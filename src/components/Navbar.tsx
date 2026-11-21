@@ -9,7 +9,7 @@ import {
   Menu,
   X,
   Sparkles,
-  PhoneCall,
+  HelpCircle,
   Info,
   ChevronRight,
 } from "lucide-react";
@@ -61,7 +61,7 @@ export default function Navbar() {
               </Link>
               <span>•</span>
               <Link href="/contact" className="hover:text-blue-300 transition-colors flex items-center gap-1">
-                <PhoneCall className="w-3 h-3" /> Karnataka Support Helpline
+                <HelpCircle className="w-3 h-3" /> Online Assistance Desks
               </Link>
             </div>
           </div>

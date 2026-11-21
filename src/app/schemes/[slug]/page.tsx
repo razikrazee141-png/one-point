@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import {
   getAllSchemes,
   getSchemeBySlug,
-  SCHEME_CATEGORIES,
 } from "@/data/schemes";
 import EnquiryForm from "@/components/EnquiryForm";
-import IndependentDisclaimerBanner from "@/components/IndependentDisclaimerBanner";
 import {
   ArrowLeft,
   Calendar,
@@ -18,7 +17,6 @@ import {
   GraduationCap,
   Sparkles,
   Layers,
-  Clock,
   Send,
   Users,
 } from "lucide-react";
@@ -90,9 +88,18 @@ export default async function SchemeDetailPage({ params }: Props) {
               <span className="px-3 py-1 rounded-full bg-blue-600/30 text-blue-300 text-xs font-bold border border-blue-500/30">
                 {scheme.categoryLabel}
               </span>
-              {scheme.isPlaceholder && (
+              {scheme.isPlaceholder ? (
                 <span className="px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold border border-amber-500/30">
                   Sample Scheme Profile
+                </span>
+              ) : (
+                <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-500/30">
+                  Official Notification Active
+                </span>
+              )}
+              {scheme.badge && (
+                <span className="px-3 py-1 rounded-full bg-red-600/40 text-red-200 text-xs font-bold border border-red-500/40">
+                  {scheme.badge}
                 </span>
               )}
               <span className="text-slate-400 text-xs flex items-center gap-1">
@@ -137,7 +144,7 @@ export default async function SchemeDetailPage({ params }: Props) {
       {/* Main Content Layout */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* Left Column: Scheme Details (8 Cols) */}
+          {/* Left Column: Scheme Details (7 Cols) */}
           <div className="lg:col-span-7 space-y-10">
             {/* Disclaimer Alert */}
             <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-950 text-xs flex items-start gap-3 shadow-xs">
@@ -151,6 +158,28 @@ export default async function SchemeDetailPage({ params }: Props) {
                 </p>
               </div>
             </div>
+
+            {/* Official Notification Image / Poster if present */}
+            {scheme.image && (
+              <div className="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200 shadow-sm space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                    Official Notification Visual
+                  </h3>
+                  <span className="text-[11px] text-blue-600 font-semibold">
+                    Government Notification Update
+                  </span>
+                </div>
+                <div className="relative w-full aspect-[4/5] sm:aspect-[4/3] rounded-xl overflow-hidden bg-slate-900 shadow-inner">
+                  <Image
+                    src={scheme.image}
+                    alt={scheme.title}
+                    fill
+                    className="object-contain"
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Scheme Description */}
             <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-4">
@@ -278,16 +307,16 @@ export default async function SchemeDetailPage({ params }: Props) {
               {/* Quick Tech Zone Support Help */}
               <div className="mt-6 p-5 rounded-2xl bg-slate-900 text-white space-y-3">
                 <h4 className="text-xs font-bold text-amber-400 uppercase tracking-widest">
-                  Assistance Hotdesk
+                  Direct Assistance Desk
                 </h4>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  Have an urgent deadline? Connect directly with our team for preliminary checklist verification.
+                  Have questions about this scheme&apos;s deadline or documentation? Submit the enquiry form above and our district coordination team will assist you with portal submission.
                 </p>
                 <Link
                   href="/contact"
                   className="inline-flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 font-semibold"
                 >
-                  <span>View District Office Coordinates</span>
+                  <span>View District Network Information</span>
                   <ExternalLink className="w-3 h-3" />
                 </Link>
               </div>

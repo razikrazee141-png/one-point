@@ -3,19 +3,19 @@ import { siteConfig } from "@/config/site";
 import EnquiryForm from "@/components/EnquiryForm";
 import IndependentDisclaimerBanner from "@/components/IndependentDisclaimerBanner";
 import {
-  Phone,
-  Mail,
   MapPin,
   Clock,
-  MessageSquare,
   Sparkles,
   Share2,
   HelpCircle,
   ShieldAlert,
+  Send,
+  Layers,
+  FileCheck2,
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Contact Us | ONE POINT – ASSURED TECH ZONE",
+  title: "Contact & Assistance Desks | ONE POINT – ASSURED TECH ZONE",
   description:
     "Get in touch with ONE POINT – ASSURED TECH ZONE. Submit your student or public welfare enquiry directly to our team across Karnataka.",
 };
@@ -32,11 +32,15 @@ export default function ContactPage() {
     },
     {
       q: "How does my enquiry get stored and tracked?",
-      a: "All website enquiries are securely processed and automatically recorded into our Google Sheets Enquiry Management system under unique Submission IDs (e.g. OP-2026-XXXX). Our team reviews submissions and contacts applicants directly.",
+      a: "All website enquiries are securely processed and automatically recorded into our Google Sheets Enquiry Management system under unique Submission IDs (e.g. OP-2611-XXXX). Our team reviews submissions and contacts applicants directly.",
     },
     {
       q: "Which regions does One Point serve?",
       a: "Our network is structured to assist students and citizens across all 31 districts of Karnataka, with a special emphasis on semi-urban and rural digital inclusion.",
+    },
+    {
+      q: "How soon will I receive assistance after submitting?",
+      a: "Our student facilitation team processes enquiries during working hours (Monday to Saturday, 9:30 AM to 6:30 PM). Enquiries are queued directly to the appropriate category desk.",
     },
   ];
 
@@ -49,10 +53,10 @@ export default function ContactPage() {
             <Sparkles className="w-3.5 h-3.5" /> Direct Support Desks
           </div>
           <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
-            Contact ONE POINT Team
+            Contact & Assistance Desks
           </h1>
           <p className="text-slate-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
-            Have questions about a scheme, documentation requirement, or digital application? Reach out to our tech zone team.
+            Have questions about a scheme, documentation requirement, or digital application? Submit an online enquiry directly to our team across Karnataka.
           </p>
         </div>
       </section>
@@ -63,90 +67,72 @@ export default function ContactPage() {
         <IndependentDisclaimerBanner compact />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* Left Column: Contact Cards & Placeholders (5 Cols) */}
+          {/* Left Column: Network & Information Cards (5 Cols) */}
           <div className="lg:col-span-5 space-y-6">
             <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
               <div>
                 <span className="text-xs font-bold text-blue-700 uppercase tracking-widest">
-                  Connect Directly
+                  Assistance Network
                 </span>
                 <h2 className="text-2xl font-black text-slate-900 mt-1">
-                  Contact Coordinates
+                  How We Assist You
                 </h2>
                 <p className="text-xs text-slate-500 mt-1">
-                  Official contact channels (Contact placeholders to be configured).
+                  Submit an enquiry online using the form on this page to connect with our support desk.
                 </p>
               </div>
 
               <div className="space-y-4 text-xs sm:text-sm">
-                {/* Phone */}
-                <div className="flex items-start gap-3.5 p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
-                  <div className="p-2.5 rounded-lg bg-emerald-100 text-emerald-700 shrink-0">
-                    <Phone className="w-5 h-5" />
+                {/* Online Form Intake Channel */}
+                <div className="flex items-start gap-3.5 p-3.5 rounded-xl bg-blue-50/70 border border-blue-200/80">
+                  <div className="p-2.5 rounded-lg bg-blue-600 text-white shrink-0">
+                    <Send className="w-5 h-5" />
                   </div>
                   <div>
-                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                      Helpline Phone
+                    <span className="text-[11px] font-bold text-blue-900 uppercase tracking-wider block">
+                      Direct Online Portal Inquiries
                     </span>
                     <span className="font-semibold text-slate-900 block mt-0.5">
-                      {siteConfig.contact.phoneDisplay}
+                      Fast Form-Based Submissions
                     </span>
-                    <span className="text-[10px] text-slate-400">
-                      Standard calling charges apply
+                    <span className="text-[11px] text-slate-600 leading-relaxed block mt-1">
+                      Fill out the enquiry form with your course, district, and questions. Every submission receives a unique tracking ID and is routed to our domain coordinators.
                     </span>
                   </div>
                 </div>
 
-                {/* WhatsApp */}
+                {/* Statewide District Network */}
                 <div className="flex items-start gap-3.5 p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
                   <div className="p-2.5 rounded-lg bg-emerald-100 text-emerald-700 shrink-0">
-                    <MessageSquare className="w-5 h-5" />
+                    <Layers className="w-5 h-5" />
                   </div>
                   <div>
                     <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                      WhatsApp Support
+                      Geographic Coverage
                     </span>
                     <span className="font-semibold text-slate-900 block mt-0.5">
-                      {siteConfig.contact.whatsappDisplay}
+                      All 31 Districts of Karnataka
                     </span>
-                    <span className="text-[10px] text-slate-400">
-                      Document inquiries and chat assistance
-                    </span>
-                  </div>
-                </div>
-
-                {/* Email */}
-                <div className="flex items-start gap-3.5 p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
-                  <div className="p-2.5 rounded-lg bg-blue-100 text-blue-700 shrink-0">
-                    <Mail className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                      Email Inquiries
-                    </span>
-                    <span className="font-semibold text-slate-900 block mt-0.5 truncate">
-                      {siteConfig.contact.email}
-                    </span>
-                    <span className="text-[10px] text-slate-400">
-                      Responses typically within 24–48 hours
+                    <span className="text-[11px] text-slate-500 block mt-0.5">
+                      Bengaluru, Mysuru, Hubballi-Dharwad, Kalaburagi, Mangaluru, Belagavi, Ballari, and all rural districts.
                     </span>
                   </div>
                 </div>
 
-                {/* Office Address */}
+                {/* Operating Center Address */}
                 <div className="flex items-start gap-3.5 p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
                   <div className="p-2.5 rounded-lg bg-purple-100 text-purple-700 shrink-0">
                     <MapPin className="w-5 h-5" />
                   </div>
                   <div>
                     <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                      Registered Office Address
+                      Registered Tech Zone Center
                     </span>
                     <span className="font-semibold text-slate-900 block mt-0.5 leading-snug">
                       {siteConfig.contact.address.line1}
                     </span>
                     <span className="text-xs text-slate-600 block mt-0.5">
-                      {siteConfig.contact.address.line2}, {siteConfig.contact.address.city}, {siteConfig.contact.address.state} – {siteConfig.contact.address.pincode}
+                      {siteConfig.contact.address.line2}, {siteConfig.contact.address.city}, {siteConfig.contact.address.state}
                     </span>
                   </div>
                 </div>
@@ -158,7 +144,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                      Operating Hours
+                      Desk Working Hours
                     </span>
                     <span className="font-semibold text-slate-900 block mt-0.5">
                       {siteConfig.contact.workingHours}
@@ -216,10 +202,10 @@ export default function ContactPage() {
             <div className="bg-amber-50/70 border border-amber-200 rounded-2xl p-5 text-xs text-amber-950 space-y-2">
               <div className="flex items-center gap-2 font-bold text-amber-900">
                 <ShieldAlert className="w-4 h-4 text-amber-700" />
-                <span>Notice Regarding Contact Information</span>
+                <span>Important Facilitation Guidelines</span>
               </div>
               <p className="leading-relaxed">
-                Contact information shown above is configured as placeholders until official verified phone lines and tech zone desks are operational. Do not remit payments to any unauthorized personal bank accounts.
+                All communications and follow-ups are conducted through authorized representatives of NextGen Organisation. One Point does not solicit fees for government welfare approvals. Please keep your Submission ID safe for all future references.
               </p>
             </div>
           </div>

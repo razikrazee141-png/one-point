@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Scheme } from "@/data/schemes";
 import {
   GraduationCap,
@@ -28,35 +29,35 @@ export default function SchemeCard({ scheme }: SchemeCardProps) {
     switch (cat) {
       case "scholarships":
         return {
-          icon: <GraduationCap className="w-5 h-5 text-blue-600" />,
+          icon: <GraduationCap className="w-4 h-4 text-blue-600" />,
           badgeBg: "bg-blue-50 text-blue-700 border-blue-200",
           cardBorder: "hover:border-blue-300",
           accentColor: "from-blue-600 to-indigo-700",
         };
       case "education-loans":
         return {
-          icon: <Landmark className="w-5 h-5 text-emerald-600" />,
+          icon: <Landmark className="w-4 h-4 text-emerald-600" />,
           badgeBg: "bg-emerald-50 text-emerald-700 border-emerald-200",
           cardBorder: "hover:border-emerald-300",
           accentColor: "from-emerald-600 to-teal-700",
         };
       case "government-welfare":
         return {
-          icon: <HeartHandshake className="w-5 h-5 text-amber-600" />,
+          icon: <HeartHandshake className="w-4 h-4 text-amber-600" />,
           badgeBg: "bg-amber-50 text-amber-800 border-amber-200",
           cardBorder: "hover:border-amber-300",
           accentColor: "from-amber-600 to-orange-700",
         };
       case "admissions":
         return {
-          icon: <BookOpen className="w-5 h-5 text-purple-600" />,
+          icon: <BookOpen className="w-4 h-4 text-purple-600" />,
           badgeBg: "bg-purple-50 text-purple-700 border-purple-200",
           cardBorder: "hover:border-purple-300",
           accentColor: "from-purple-600 to-pink-700",
         };
       default:
         return {
-          icon: <Sparkles className="w-5 h-5 text-slate-600" />,
+          icon: <Sparkles className="w-4 h-4 text-slate-600" />,
           badgeBg: "bg-slate-100 text-slate-700 border-slate-200",
           cardBorder: "hover:border-slate-300",
           accentColor: "from-slate-700 to-slate-900",
@@ -74,6 +75,23 @@ export default function SchemeCard({ scheme }: SchemeCardProps) {
         {/* Top color highlight bar */}
         <div className={`h-1.5 w-full bg-gradient-to-r ${catStyle.accentColor}`} />
 
+        {/* Scheme Image Banner if available */}
+        {scheme.image && (
+          <div className="relative w-full h-44 overflow-hidden bg-slate-900 border-b border-slate-100">
+            <Image
+              src={scheme.image}
+              alt={scheme.title}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+            {scheme.badge && (
+              <span className="absolute top-3 right-3 bg-red-600/95 text-white font-bold text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md backdrop-blur-xs">
+                {scheme.badge}
+              </span>
+            )}
+          </div>
+        )}
+
         <div className="p-6 flex-1 flex flex-col">
           {/* Top header row: Category badge & Placeholder notice */}
           <div className="flex items-center justify-between gap-2 mb-3.5 flex-wrap">
@@ -84,9 +102,13 @@ export default function SchemeCard({ scheme }: SchemeCardProps) {
               {scheme.categoryLabel}
             </span>
 
-            {scheme.isPlaceholder && (
+            {scheme.isPlaceholder ? (
               <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
                 Sample Scheme
+              </span>
+            ) : (
+              <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">
+                Verified Active
               </span>
             )}
           </div>
@@ -118,7 +140,7 @@ export default function SchemeCard({ scheme }: SchemeCardProps) {
               <Calendar className="w-3.5 h-3.5 text-slate-400" />
               <span>
                 {scheme.importantDates[0].label}:{" "}
-                <strong className="text-slate-700">{scheme.importantDates[0].value}</strong>
+                <strong className="text-slate-800">{scheme.importantDates[0].value}</strong>
               </span>
             </div>
           )}

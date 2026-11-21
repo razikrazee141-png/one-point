@@ -8,11 +8,6 @@ export interface SiteConfig {
   disclaimer: string;
   shortDisclaimer: string;
   contact: {
-    phone: string;
-    phoneDisplay: string;
-    email: string;
-    whatsapp: string;
-    whatsappDisplay: string;
     address: {
       line1: string;
       line2: string;
@@ -44,15 +39,10 @@ export const siteConfig: SiteConfig = {
   shortDisclaimer:
     "Independent service organisation operating under NextGen Organisation. Not a government agency.",
   contact: {
-    phone: "+91-XXXXXXXXXX",
-    phoneDisplay: "+91 (Contact Number Placeholder)",
-    email: "contact@onepoint.org.in (Placeholder)",
-    whatsapp: "+91XXXXXXXXXX",
-    whatsappDisplay: "+91 (WhatsApp Helpline Placeholder)",
     address: {
-      line1: "Office Location / Tech Zone Centre (Placeholder)",
+      line1: "Tech Zone Public Assistance Network",
       line2: "Operating across Karnataka District Network",
-      city: "Bengaluru / Hubballi / Mangaluru",
+      city: "Bengaluru & Karnataka District Hubs",
       state: "Karnataka",
       pincode: "560001",
     },

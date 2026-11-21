@@ -4,13 +4,12 @@ import Link from "next/link";
 import { siteConfig } from "@/config/site";
 import BrandLogo from "./BrandLogo";
 import {
-  Phone,
-  Mail,
   MapPin,
   Clock,
   ArrowRight,
   Shield,
-  ExternalLink,
+  FileQuestion,
+  Layers,
 } from "lucide-react";
 
 export default function Footer() {
@@ -90,7 +89,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/contact" className="hover:text-blue-400 transition-colors">
-                  Contact
+                  Contact & Enquiries
                 </Link>
               </li>
             </ul>
@@ -130,27 +129,27 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Contact Details (Configurable Placeholders) */}
+          {/* District Assistance Network Details */}
           <div className="lg:col-span-3 space-y-3">
             <h4 className="text-xs font-bold text-white uppercase tracking-wider">
-              Tech Zone Helpdesk
+              Tech Zone Assistance
             </h4>
             <ul className="space-y-2.5 text-xs text-slate-400">
               <li className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
-                <span>{siteConfig.contact.address.line1}, {siteConfig.contact.address.state}</span>
+                <span>{siteConfig.contact.address.line1}, {siteConfig.contact.address.city}, {siteConfig.contact.address.state}</span>
               </li>
               <li className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>{siteConfig.contact.phoneDisplay}</span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Mail className="w-4 h-4 text-amber-400 shrink-0" />
-                <span className="truncate">{siteConfig.contact.email}</span>
+                <Layers className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>Serving All 31 Districts of Karnataka</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Clock className="w-4 h-4 text-purple-400 shrink-0" />
                 <span>{siteConfig.contact.workingHours}</span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <FileQuestion className="w-4 h-4 text-amber-400 shrink-0" />
+                <span>Online Form Enquiry Tracking Available 24/7</span>
               </li>
             </ul>
 
@@ -159,8 +158,8 @@ export default function Footer() {
                 href="/contact"
                 className="inline-flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 font-semibold"
               >
-                <span>Find Local Karnataka District Centres</span>
-                <ExternalLink className="w-3 h-3" />
+                <span>Submit Direct Assistance Request</span>
+                <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
           </div>
