@@ -42,14 +42,14 @@ export default function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const featuredSchemes = getFeaturedSchemes();
 
-  // 1. Service Cards (Section 6: Explore Our Services)
+  // 1. Service Cards (Section 6: Explore Our Services) - Featuring Indian Student & Institutional Imagery
   const serviceCards = [
     {
       id: "education-scholarships",
       title: "Education & Scholarships",
       description:
         "Comprehensive assistance for state and central scholarships, fee reimbursement schemes, nursing incentives, and pre-matric to post-matric grants.",
-      image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=800&auto=format&fit=crop",
+      image: "https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?q=80&w=800&auto=format&fit=crop",
       badge: "Education",
       link: "/services#education",
     },
@@ -58,7 +58,7 @@ export default function HomePage() {
       title: "Government Schemes",
       description:
         "Independent verification and digital assistance for state citizen welfare, social security, minority welfare schemes, and Seva Sindhu services.",
-      image: "https://images.unsplash.com/photo-1450133064473-71024230f91b?q=80&w=800&auto=format&fit=crop",
+      image: "https://images.unsplash.com/photo-1596176530529-78163a4f7af2?q=80&w=800&auto=format&fit=crop",
       badge: "Welfare",
       link: "/services#welfare",
     },
@@ -67,7 +67,7 @@ export default function HomePage() {
       title: "Student & Career Guidance",
       description:
         "Personalized documentation checklists, higher education loan guidance, college entrance admissions support, and career pathway counseling.",
-      image: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=800&auto=format&fit=crop",
+      image: "https://images.unsplash.com/photo-1577495508048-b635879837f1?q=80&w=800&auto=format&fit=crop",
       badge: "Guidance",
       link: "/services#education",
     },
@@ -76,7 +76,7 @@ export default function HomePage() {
       title: "Digital Public Services",
       description:
         "Reliable tech assistance for online certificate applications, RD number verification, document digitization, and public digital portal submissions.",
-      image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=800&auto=format&fit=crop",
+      image: "https://images.unsplash.com/photo-1569653402334-2e98fbaa80ee?q=80&w=800&auto=format&fit=crop",
       badge: "Digital",
       link: "/services#digital",
     },
@@ -296,10 +296,10 @@ export default function HomePage() {
               {/* Main Photograph Frame */}
               <div className="relative rounded-3xl overflow-hidden border border-white/20 shadow-2xl bg-[#1D143D]/60 aspect-[4/5] sm:aspect-[3/4]">
                 <Image
-                  src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=1000&auto=format&fit=crop"
-                  alt="Students collaborating at OnePoint"
+                  src="/images/onepoint-hero-student.jpg"
+                  alt="Indian student at OnePoint Assured Tech Zone"
                   fill
-                  className="object-cover object-center"
+                  className="object-cover object-top"
                   priority
                 />
                 {/* Gradient Overlays for Cinematic Depth */}
@@ -704,8 +704,8 @@ export default function HomePage() {
             <div className="lg:col-span-6 relative">
               <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-[#E0D4FF] aspect-[4/3]">
                 <Image
-                  src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=900&auto=format&fit=crop"
-                  alt="Student using laptop in a modern collaborative hub"
+                  src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=900&auto=format&fit=crop"
+                  alt="Indian student learning in a modern collaborative digital environment"
                   fill
                   className="object-cover"
                 />
@@ -848,8 +848,8 @@ export default function HomePage() {
       <section className="relative py-24 md:py-32 bg-[#130D29] text-white overflow-hidden">
         {/* Cinematic Background Image */}
         <Image
-          src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1600&auto=format&fit=crop"
-          alt="University campus"
+          src="https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=1600&auto=format&fit=crop"
+          alt="Indian higher education campus library"
           fill
           className="object-cover object-center opacity-25"
         />
