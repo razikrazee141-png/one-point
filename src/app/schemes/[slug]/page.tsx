@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import {
   getAllSchemes,
   getSchemeBySlug,
 } from "@/data/schemes";
+import { siteConfig } from "@/config/site";
 import EnquiryForm from "@/components/EnquiryForm";
 import {
   ArrowLeft,
@@ -19,6 +19,7 @@ import {
   Layers,
   Send,
   Users,
+  MessageCircle,
 } from "lucide-react";
 
 interface Props {
@@ -159,24 +160,19 @@ export default async function SchemeDetailPage({ params }: Props) {
               </div>
             </div>
 
-            {/* Official Notification Image / Poster if present */}
-            {scheme.image && (
-              <div className="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200 shadow-sm space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    Official Notification Visual
-                  </h3>
-                  <span className="text-[11px] text-blue-600 font-semibold">
-                    Government Notification Update
+            {/* Official Announcement Summary Banner */}
+            {scheme.badge && (
+              <div className="bg-gradient-to-r from-red-50 via-white to-amber-50 rounded-2xl p-5 border border-red-200 shadow-xs flex items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <span className="text-[10px] font-bold text-red-700 bg-red-100 border border-red-200 px-2 py-0.5 rounded uppercase tracking-wider inline-block">
+                    {scheme.badge}
                   </span>
-                </div>
-                <div className="relative w-full aspect-[4/5] sm:aspect-[4/3] rounded-xl overflow-hidden bg-slate-900 shadow-inner">
-                  <Image
-                    src={scheme.image}
-                    alt={scheme.title}
-                    fill
-                    className="object-contain"
-                  />
+                  <h3 className="text-sm font-bold text-slate-900">
+                    Official Karnataka State Notification Update
+                  </h3>
+                  <p className="text-xs text-slate-600">
+                    Verified opportunity extracted from official public gazettes. Follow instructions below to apply on time.
+                  </p>
                 </div>
               </div>
             )}
@@ -310,15 +306,26 @@ export default async function SchemeDetailPage({ params }: Props) {
                   Direct Assistance Desk
                 </h4>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  Have questions about this scheme&apos;s deadline or documentation? Submit the enquiry form above and our district coordination team will assist you with portal submission.
+                  Have questions about this scheme&apos;s deadline or documentation? Submit the enquiry form above or chat directly with our coordinator on WhatsApp.
                 </p>
-                <Link
-                  href="/contact"
-                  className="inline-flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 font-semibold"
+                <a
+                  href={`https://wa.me/918197803617?text=Hello%20One%20Point%20Team%2C%20I%20need%20assistance%20regarding%20${encodeURIComponent(scheme.title)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider transition-colors shadow-sm"
                 >
-                  <span>View District Network Information</span>
-                  <ExternalLink className="w-3 h-3" />
-                </Link>
+                  <MessageCircle className="w-4 h-4" />
+                  <span>WhatsApp: 8197803617</span>
+                </a>
+                <div className="pt-1">
+                  <Link
+                    href="/contact"
+                    className="inline-flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 font-semibold"
+                  >
+                    <span>View District Network Information</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </Link>
+                </div>
               </div>
             </div>
           </div>

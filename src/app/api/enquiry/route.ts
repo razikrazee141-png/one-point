@@ -152,9 +152,51 @@ export async function POST(request: Request) {
       status: "New",
     };
 
-    const googleAppsScriptUrl = process.env.GOOGLE_APPS_SCRIPT_URL;
+    let syncedWithGoogle = false;
 
-    // 4. Forward to Google Apps Script if URL is configured
+    // 4. Option A: Forward directly to Google Form endpoint if configured
+    const googleFormUrl = process.env.GOOGLE_FORM_URL;
+    if (googleFormUrl && googleFormUrl.includes("formResponse")) {
+      try {
+        const formParams = new URLSearchParams();
+
+        // Map fields using environment entry ID variables, or common entry names
+        const entryMap: Record<string, string | undefined> = {
+          [process.env.GOOGLE_FORM_ENTRY_FULL_NAME || "entry.1000001"]: fullName,
+          [process.env.GOOGLE_FORM_ENTRY_MOBILE || "entry.1000002"]: mobileNumber,
+          [process.env.GOOGLE_FORM_ENTRY_DISTRICT || "entry.1000003"]: district,
+          [process.env.GOOGLE_FORM_ENTRY_SCHEME || "entry.1000004"]: schemeName,
+          [process.env.GOOGLE_FORM_ENTRY_MESSAGE || "entry.1000005"]: message,
+          [process.env.GOOGLE_FORM_ENTRY_EMAIL || "entry.1000006"]: email,
+          [process.env.GOOGLE_FORM_ENTRY_TALUK || "entry.1000007"]: taluk,
+          [process.env.GOOGLE_FORM_ENTRY_QUALIFICATION || "entry.1000008"]: qualification,
+          [process.env.GOOGLE_FORM_ENTRY_SUBMISSION_ID || "entry.1000009"]: submissionId,
+        };
+
+        for (const [key, val] of Object.entries(entryMap)) {
+          if (key && val) {
+            formParams.append(key, val);
+          }
+        }
+
+        await fetch(googleFormUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: formParams.toString(),
+          mode: "no-cors",
+          signal: AbortSignal.timeout(8000),
+        });
+
+        syncedWithGoogle = true;
+      } catch (formErr) {
+        console.error("Google Form forwarding error:", formErr);
+      }
+    }
+
+    // 4. Option B: Forward to Google Apps Script Web App (which logs into multi-tab Google Sheet)
+    const googleAppsScriptUrl = process.env.GOOGLE_APPS_SCRIPT_URL;
     if (googleAppsScriptUrl && googleAppsScriptUrl.startsWith("http")) {
       try {
         const response = await fetch(googleAppsScriptUrl, {
@@ -168,50 +210,29 @@ export async function POST(request: Request) {
 
         const gasResult = await response.json().catch(() => null);
 
-        if (!response.ok || (gasResult && gasResult.success === false)) {
-          console.error("Google Apps Script Error:", gasResult || response.statusText);
-          return NextResponse.json({
-            success: true,
-            submissionId,
-            warning: "Submission logged locally. Google Sheets sync pending.",
-            message: "Enquiry registered successfully with ID: " + submissionId,
-            googleSheetsSynced: false,
-          });
+        if (response.ok && (!gasResult || gasResult.success !== false)) {
+          syncedWithGoogle = true;
         }
-
-        return NextResponse.json({
-          success: true,
-          submissionId,
-          message: "Enquiry registered and saved to Google Sheets successfully.",
-          googleSheetsSynced: true,
-        });
       } catch (gasError) {
         console.error("Failed to forward enquiry to Google Apps Script:", gasError);
-        return NextResponse.json({
-          success: true,
-          submissionId,
-          warning: "Submission received. Remote Google Sheet connection timed out or is unreachable.",
-          message: "Enquiry registered successfully with ID: " + submissionId,
-          googleSheetsSynced: false,
-        });
       }
     }
 
-    // Fallback when GOOGLE_APPS_SCRIPT_URL is not yet set
     return NextResponse.json({
       success: true,
       submissionId,
-      message:
-        "Enquiry registered successfully! (Note: GOOGLE_APPS_SCRIPT_URL not configured in environment yet; follow GOOGLE_SHEETS_SETUP.md to activate real-time Google Sheets streaming).",
-      googleSheetsSynced: false,
-      isDemoMode: true,
+      message: syncedWithGoogle
+        ? "Enquiry registered and saved to Google successfully."
+        : "Enquiry registered successfully! (Stored with ID: " + submissionId + ")",
+      googleSynced: syncedWithGoogle,
+      isDemoMode: !syncedWithGoogle,
     });
   } catch (error) {
     console.error("Enquiry API fatal error:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "An unexpected error occurred while submitting your enquiry. Please try again or contact us directly.",
+        error: "An unexpected error occurred while submitting your enquiry. Please try again or contact us directly on WhatsApp.",
       },
       { status: 500 }
     );

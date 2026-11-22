@@ -12,6 +12,7 @@ import {
   Send,
   Layers,
   FileCheck2,
+  MessageCircle,
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -83,6 +84,35 @@ export default function ContactPage() {
               </div>
 
               <div className="space-y-4 text-xs sm:text-sm">
+                {/* Direct WhatsApp Contact Card */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-emerald-50 border border-emerald-200">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2.5 rounded-lg bg-emerald-600 text-white shrink-0 mt-0.5">
+                      <MessageCircle className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider block">
+                        Direct WhatsApp Support
+                      </span>
+                      <span className="text-base font-bold text-slate-900 block mt-0.5">
+                        +91 81978 03617
+                      </span>
+                      <span className="text-[11px] text-emerald-700">
+                        Chat directly with our student assistance team
+                      </span>
+                    </div>
+                  </div>
+                  <a
+                    href="https://wa.me/918197803617?text=Hello%20One%20Point%20Team%2C%20I%20would%20like%20assistance%20with%20an%20educational%20scheme."
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider transition-colors shadow-sm shrink-0"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5" />
+                    <span>Open WhatsApp</span>
+                  </a>
+                </div>
+
                 {/* Online Form Intake Channel */}
                 <div className="flex items-start gap-3.5 p-3.5 rounded-xl bg-blue-50/70 border border-blue-200/80">
                   <div className="p-2.5 rounded-lg bg-blue-600 text-white shrink-0">

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Scheme } from "@/data/schemes";
 import {
   GraduationCap,
@@ -75,32 +74,22 @@ export default function SchemeCard({ scheme }: SchemeCardProps) {
         {/* Top color highlight bar */}
         <div className={`h-1.5 w-full bg-gradient-to-r ${catStyle.accentColor}`} />
 
-        {/* Scheme Image Banner if available */}
-        {scheme.image && (
-          <div className="relative w-full h-44 overflow-hidden bg-slate-900 border-b border-slate-100">
-            <Image
-              src={scheme.image}
-              alt={scheme.title}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-            {scheme.badge && (
-              <span className="absolute top-3 right-3 bg-red-600/95 text-white font-bold text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md backdrop-blur-xs">
-                {scheme.badge}
-              </span>
-            )}
-          </div>
-        )}
-
         <div className="p-6 flex-1 flex flex-col">
-          {/* Top header row: Category badge & Placeholder notice */}
+          {/* Top header row: Category badge, Status & Optional Announcement Badge */}
           <div className="flex items-center justify-between gap-2 mb-3.5 flex-wrap">
-            <span
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${catStyle.badgeBg}`}
-            >
-              {catStyle.icon}
-              {scheme.categoryLabel}
-            </span>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${catStyle.badgeBg}`}
+              >
+                {catStyle.icon}
+                {scheme.categoryLabel}
+              </span>
+              {scheme.badge && (
+                <span className="bg-red-50 text-red-700 border border-red-200 font-bold text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full">
+                  {scheme.badge}
+                </span>
+              )}
+            </div>
 
             {scheme.isPlaceholder ? (
               <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 bg-slate-100 px-2 py-0.5 rounded">

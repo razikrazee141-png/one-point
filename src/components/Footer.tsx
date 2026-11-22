@@ -10,6 +10,7 @@ import {
   Shield,
   FileQuestion,
   Layers,
+  MessageCircle,
 } from "lucide-react";
 
 export default function Footer() {
@@ -138,6 +139,17 @@ export default function Footer() {
               <li className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
                 <span>{siteConfig.contact.address.line1}, {siteConfig.contact.address.city}, {siteConfig.contact.address.state}</span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <MessageCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                <a
+                  href="https://wa.me/918197803617?text=Hello%20One%20Point%20Team%2C%20I%20would%20like%20assistance%20with%20an%20educational%20scheme."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-emerald-300 font-medium transition-colors"
+                >
+                  WhatsApp: <strong className="text-white">+91 81978 03617</strong>
+                </a>
               </li>
               <li className="flex items-center gap-2.5">
                 <Layers className="w-4 h-4 text-emerald-400 shrink-0" />

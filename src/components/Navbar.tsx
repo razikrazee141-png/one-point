@@ -12,6 +12,7 @@ import {
   HelpCircle,
   Info,
   ChevronRight,
+  MessageCircle,
 } from "lucide-react";
 
 export default function Navbar() {
@@ -60,9 +61,15 @@ export default function Navbar() {
                 Public Mandate
               </Link>
               <span>•</span>
-              <Link href="/contact" className="hover:text-blue-300 transition-colors flex items-center gap-1">
-                <HelpCircle className="w-3 h-3" /> Online Assistance Desks
-              </Link>
+              <a
+                href="https://wa.me/918197803617?text=Hello%20One%20Point%20Team%2C%20I%20would%20like%20assistance%20with%20an%20educational%20scheme."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors flex items-center gap-1.5"
+              >
+                <MessageCircle className="w-3.5 h-3.5" />
+                <span>WhatsApp: 8197803617</span>
+              </a>
             </div>
           </div>
         </div>
@@ -157,14 +164,24 @@ export default function Navbar() {
                 );
               })}
 
-              <div className="pt-4 border-t border-slate-100">
+              <div className="pt-4 border-t border-slate-100 space-y-2">
+                <a
+                  href="https://wa.me/918197803617?text=Hello%20One%20Point%20Team%2C%20I%20would%20like%20assistance%20with%20an%20educational%20scheme."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm shadow-md"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>Chat on WhatsApp: 8197803617</span>
+                </a>
+
                 <button
                   type="button"
                   onClick={() => {
                     setMobileMenuOpen(false);
                     setIsModalOpen(true);
                   }}
-                  className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-semibold text-sm shadow-md"
+                  className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-semibold text-sm shadow-md cursor-pointer"
                 >
                   <Sparkles className="w-4 h-4 text-amber-300" />
                   <span>Request Student / Public Assistance</span>
