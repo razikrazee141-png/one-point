@@ -42,14 +42,14 @@ export default function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const featuredSchemes = getFeaturedSchemes();
 
-  // 1. Service Cards (Section 6: Explore Our Services) - Featuring Indian Student & Institutional Imagery
+  // 1. Service Cards (Section 6: Explore Our Services) - Featuring Indian Student, Karnataka Vidhana Soudha & Rural Guidance Imagery
   const serviceCards = [
     {
       id: "education-scholarships",
       title: "Education & Scholarships",
       description:
         "Comprehensive assistance for state and central scholarships, fee reimbursement schemes, nursing incentives, and pre-matric to post-matric grants.",
-      image: "https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?q=80&w=800&auto=format&fit=crop",
+      image: "https://images.unsplash.com/photo-1627556704290-2b1f5853ff78?q=80&w=800&auto=format&fit=crop",
       badge: "Education",
       link: "/services#education",
     },
@@ -58,7 +58,7 @@ export default function HomePage() {
       title: "Government Schemes",
       description:
         "Independent verification and digital assistance for state citizen welfare, social security, minority welfare schemes, and Seva Sindhu services.",
-      image: "https://images.unsplash.com/photo-1596176530529-78163a4f7af2?q=80&w=800&auto=format&fit=crop",
+      image: "https://images.unsplash.com/photo-1709967884183-7ffa9d168508?q=80&w=800&auto=format&fit=crop",
       badge: "Welfare",
       link: "/services#welfare",
     },
@@ -67,7 +67,7 @@ export default function HomePage() {
       title: "Student & Career Guidance",
       description:
         "Personalized documentation checklists, higher education loan guidance, college entrance admissions support, and career pathway counseling.",
-      image: "https://images.unsplash.com/photo-1577495508048-b635879837f1?q=80&w=800&auto=format&fit=crop",
+      image: "https://images.unsplash.com/photo-1549499090-e59ca39388ec?q=80&w=800&auto=format&fit=crop",
       badge: "Guidance",
       link: "/services#education",
     },
