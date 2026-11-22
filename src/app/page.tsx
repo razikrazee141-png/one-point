@@ -67,7 +67,7 @@ export default function HomePage() {
       title: "Student & Career Guidance",
       description:
         "Personalized documentation checklists, higher education loan guidance, college entrance admissions support, and career pathway counseling.",
-      image: "https://images.unsplash.com/photo-1549499090-e59ca39388ec?q=80&w=800&auto=format&fit=crop",
+      image: "/images/indian-student-hero.jpg",
       badge: "Guidance",
       link: "/services#education",
     },
@@ -296,8 +296,8 @@ export default function HomePage() {
               {/* Main Photograph Frame */}
               <div className="relative rounded-3xl overflow-hidden border border-white/20 shadow-2xl bg-[#1D143D]/60 aspect-[4/5] sm:aspect-[3/4]">
                 <Image
-                  src="/images/onepoint-hero-student.jpg"
-                  alt="Indian student at OnePoint Assured Tech Zone"
+                  src="/images/indian-student-hero.jpg"
+                  alt="Indian student on campus at OnePoint"
                   fill
                   className="object-cover object-top"
                   priority
