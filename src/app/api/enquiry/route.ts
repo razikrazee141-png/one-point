@@ -137,7 +137,7 @@ export async function POST(request: Request) {
     let supabaseRecordId: string | null = enquiryUuid;
 
     // 4. Record into Supabase (both onepoint_enquiries and NextGen inquiries)
-    const supabase = getSupabase();
+    const supabase = getSupabase(true);
     if (supabase) {
       try {
         const fullLocation = district + (taluk ? `, ${taluk}` : "");

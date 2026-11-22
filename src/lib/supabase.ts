@@ -41,33 +41,67 @@ export interface OnepointServiceRequest {
 }
 
 let cachedClient: SupabaseClient | null = null;
+let cachedKeyUsed: string | null = null;
 
-export function getSupabase(): SupabaseClient | null {
-  if (cachedClient) return cachedClient;
-
+export function getSupabaseDiagnostics() {
   const url =
     process.env.NEXT_PUBLIC_SUPABASE_URL ||
     process.env.VITE_SUPABASE_URL ||
     process.env.SUPABASE_URL;
 
-  const key =
+  const anonKey =
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     process.env.VITE_SUPABASE_ANON_KEY ||
     process.env.SUPABASE_ANON_KEY;
 
-  if (url && key && url.startsWith("http")) {
-    try {
-      cachedClient = createClient(url, key, {
-        auth: {
-          persistSession: false,
-          autoRefreshToken: false,
-        },
-      });
-      return cachedClient;
-    } catch (err) {
-      console.warn("[OnePoint Supabase] Initialization error:", err);
-    }
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  const hasUrl = Boolean(url && url.startsWith("http"));
+  const hasAnonKey = Boolean(anonKey && anonKey.length > 20);
+  const hasServiceRoleKey = Boolean(serviceRoleKey && serviceRoleKey.length > 20);
+
+  return {
+    isConfigured: hasUrl && (hasAnonKey || hasServiceRoleKey),
+    hasUrl,
+    hasAnonKey,
+    hasServiceRoleKey,
+    url: url || "",
+  };
+}
+
+export function getSupabase(preferServiceRole = true): SupabaseClient | null {
+  const url =
+    process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    process.env.VITE_SUPABASE_URL ||
+    process.env.SUPABASE_URL;
+
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const anonKey =
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.VITE_SUPABASE_ANON_KEY ||
+    process.env.SUPABASE_ANON_KEY;
+
+  const key = preferServiceRole && serviceKey ? serviceKey : (anonKey || serviceKey);
+
+  if (!url || !key || !url.startsWith("http")) {
+    return null;
   }
 
-  return null;
+  if (cachedClient && cachedKeyUsed === key) {
+    return cachedClient;
+  }
+
+  try {
+    cachedClient = createClient(url, key, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    });
+    cachedKeyUsed = key;
+    return cachedClient;
+  } catch (err) {
+    console.warn("[OnePoint Supabase] Initialization error:", err);
+    return null;
+  }
 }

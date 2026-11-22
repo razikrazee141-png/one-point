@@ -34,6 +34,8 @@ import {
   Copy,
   Share2,
   Building,
+  Database,
+  Server,
 } from "lucide-react";
 
 interface EnquiryItem {
@@ -98,6 +100,10 @@ export default function AdminPage() {
   const [enquiries, setEnquiries] = useState<EnquiryItem[]>([]);
   const [dataLoading, setDataLoading] = useState(false);
   const [dataError, setDataError] = useState("");
+  const [isConfigError, setIsConfigError] = useState(false);
+  const [missingVars, setMissingVars] = useState<string[]>([]);
+  const [isTableError, setIsTableError] = useState(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState("");
@@ -181,6 +187,9 @@ export default function AdminPage() {
   const fetchEnquiries = async () => {
     setDataLoading(true);
     setDataError("");
+    setIsConfigError(false);
+    setIsTableError(false);
+    setMissingVars([]);
     try {
       const res = await fetch("/api/admin/enquiries");
       const data = await res.json();
@@ -188,6 +197,13 @@ export default function AdminPage() {
         setEnquiries(data.enquiries || []);
       } else {
         setDataError(data.error || "Failed to fetch enquiries from database.");
+        if (data.isConfigError) {
+          setIsConfigError(true);
+          setMissingVars(data.missingVars || ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY"]);
+        }
+        if (data.isTableError) {
+          setIsTableError(true);
+        }
       }
     } catch {
       setDataError("Network error while connecting to administrative database.");
@@ -782,10 +798,22 @@ ONE POINT Team`);
               <span className="px-2.5 py-0.5 rounded-md bg-royal-500/20 text-royal-300 font-mono text-xs font-semibold uppercase tracking-wider border border-royal-500/30">
                 Admin Zone
               </span>
-              <span className="flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                Live Supabase Connected
-              </span>
+              {dataLoading ? (
+                <span className="flex items-center gap-1.5 text-xs text-amber-400 font-medium">
+                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                  Connecting to Database...
+                </span>
+              ) : dataError ? (
+                <span className="flex items-center gap-1.5 text-xs text-red-400 font-medium">
+                  <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                  Database Disconnected
+                </span>
+              ) : (
+                <span className="flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  Live Supabase Connected
+                </span>
+              )}
             </div>
           </div>
 
@@ -966,15 +994,104 @@ ONE POINT Team`);
               <p className="font-medium text-sm">Fetching enquiries from database...</p>
             </div>
           ) : dataError ? (
-            <div className="p-12 text-center text-red-400">
-              <AlertCircle className="w-8 h-8 mx-auto mb-3" />
-              <p className="font-semibold">{dataError}</p>
-              <button
-                onClick={fetchEnquiries}
-                className="mt-4 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold inline-flex items-center gap-2"
-              >
-                <RefreshCw className="w-3.5 h-3.5" /> Try Again
-              </button>
+            <div className="p-6 sm:p-10 space-y-6">
+              {/* Main Error Banner */}
+              <div className="p-5 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-start gap-3.5">
+                  <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-bold text-white text-base">Backend Connection Notice</h4>
+                    <p className="text-xs text-red-300/90 mt-1 leading-relaxed">{dataError}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={fetchEnquiries}
+                  disabled={dataLoading}
+                  className="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-semibold inline-flex items-center gap-2 flex-shrink-0 transition-colors shadow-lg shadow-red-600/30"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${dataLoading ? "animate-spin" : ""}`} />
+                  Retry Connection
+                </button>
+              </div>
+
+              {/* Vercel Environment Variables Quick-Fix Guide (if config error) */}
+              {(isConfigError || dataError.toLowerCase().includes("environment variable") || dataError.toLowerCase().includes("unavailable")) && (
+                <div className="bg-slate-950/80 border border-royal-500/30 rounded-2xl p-6 sm:p-8 space-y-5 text-left">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-xl bg-royal-500/20 text-royal-400 border border-royal-500/30">
+                      <Database className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white">How to Connect Supabase on Vercel</h3>
+                      <p className="text-xs text-slate-400">
+                        When hosting on Vercel, local <code className="text-royal-400 font-mono">.env</code> files are ignored by git for security. You must add these variables in your Vercel Dashboard.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* 3 Step Instructions */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                    <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
+                      <span className="text-xs font-bold text-royal-400 font-mono">STEP 1</span>
+                      <p className="text-sm font-semibold text-white">Open Vercel Dashboard</p>
+                      <p className="text-xs text-slate-400">Go to your project on <a href="https://vercel.com" target="_blank" rel="noreferrer" className="text-royal-400 underline">vercel.com</a> &gt; <strong>Settings</strong> &gt; <strong>Environment Variables</strong>.</p>
+                    </div>
+                    <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
+                      <span className="text-xs font-bold text-royal-400 font-mono">STEP 2</span>
+                      <p className="text-sm font-semibold text-white">Add the 2 Variables Below</p>
+                      <p className="text-xs text-slate-400">Copy the Key and Value below and add them for Production, Preview &amp; Development.</p>
+                    </div>
+                    <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
+                      <span className="text-xs font-bold text-royal-400 font-mono">STEP 3</span>
+                      <p className="text-sm font-semibold text-white">Redeploy Your Site</p>
+                      <p className="text-xs text-slate-400">Go to <strong>Deployments</strong> tab &gt; click the three dots &gt; <strong>Redeploy</strong> to apply the changes.</p>
+                    </div>
+                  </div>
+
+                  {/* Variables to Copy */}
+                  <div className="space-y-3 pt-2">
+                    <p className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Required Environment Variables:</p>
+                    
+                    {/* Var 1: URL */}
+                    <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <span className="font-mono text-xs font-bold text-royal-400">NEXT_PUBLIC_SUPABASE_URL</span>
+                        <p className="font-mono text-xs text-slate-400 truncate max-w-md mt-0.5">https://vaoezgeqinspwcchkizo.supabase.co</p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText("https://vaoezgeqinspwcchkizo.supabase.co");
+                          setCopiedKey("url");
+                          setTimeout(() => setCopiedKey(null), 2000);
+                        }}
+                        className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200 inline-flex items-center gap-1.5 flex-shrink-0 transition-colors"
+                      >
+                        {copiedKey === "url" ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                        {copiedKey === "url" ? "Copied URL" : "Copy Value"}
+                      </button>
+                    </div>
+
+                    {/* Var 2: Anon Key */}
+                    <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <span className="font-mono text-xs font-bold text-royal-400">NEXT_PUBLIC_SUPABASE_ANON_KEY</span>
+                        <p className="font-mono text-xs text-slate-400 truncate max-w-md mt-0.5">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhb2V6Z2VxaW5zcHdjY2hraXpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM2MDQ3MjgsImV4cCI6MjEwOTE4MDcyOH0.jIsJCGNga4bU3Gt2JaXOTDpHWyCSyciRNAwH_PgLT1I</p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhb2V6Z2VxaW5zcHdjY2hraXpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM2MDQ3MjgsImV4cCI6MjEwOTE4MDcyOH0.jIsJCGNga4bU3Gt2JaXOTDpHWyCSyciRNAwH_PgLT1I");
+                          setCopiedKey("key");
+                          setTimeout(() => setCopiedKey(null), 2000);
+                        }}
+                        className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200 inline-flex items-center gap-1.5 flex-shrink-0 transition-colors"
+                      >
+                        {copiedKey === "key" ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                        {copiedKey === "key" ? "Copied Key" : "Copy Value"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           ) : filteredEnquiries.length === 0 ? (
             <div className="p-16 text-center text-slate-400">
