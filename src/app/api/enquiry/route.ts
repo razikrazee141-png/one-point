@@ -130,11 +130,13 @@ export async function POST(request: Request) {
     const dateSegment = `${timestamp.getFullYear().toString().slice(-2)}${(timestamp.getMonth() + 1).toString().padStart(2, "0")}`;
     const randomSegment = Math.floor(1000 + Math.random() * 9000);
     const submissionId = `${idPrefix}-${dateSegment}-${randomSegment}`;
+    const enquiryUuid = crypto.randomUUID();
+    const nxgTrackingId = `NXG-${submissionId}`;
 
     let supabaseSynced = false;
-    let supabaseRecordId: string | null = null;
+    let supabaseRecordId: string | null = enquiryUuid;
 
-    // 4. Record into Supabase onepoint_enquiries table
+    // 4. Record into Supabase (both onepoint_enquiries and NextGen inquiries)
     const supabase = getSupabase();
     if (supabase) {
       try {
@@ -147,9 +149,11 @@ export async function POST(request: Request) {
           .filter(Boolean)
           .join(" ");
 
-        const { data, error } = await supabase
+        // 4A. Primary: onepoint_enquiries table (No .select() to comply with RLS on anonymous insert)
+        const { error: opError, status: opStatus } = await supabase
           .from("onepoint_enquiries")
           .insert({
+            id: enquiryUuid,
             full_name: fullName,
             phone_number: mobileNumber,
             email: email,
@@ -158,15 +162,36 @@ export async function POST(request: Request) {
             service_description: detailedDescription,
             preferred_contact_method: preferredContactMethod,
             status: "pending",
-          })
-          .select("id")
-          .single();
+          });
 
-        if (error) {
-          console.warn("[Supabase] onepoint_enquiries notice:", error.message);
-        } else if (data) {
+        if (opError) {
+          console.warn("[Supabase] onepoint_enquiries insert notice:", opError.message);
+        } else if (opStatus === 201 || opStatus === 200 || !opError) {
           supabaseSynced = true;
-          supabaseRecordId = data.id;
+          console.log("[Supabase] Inserted into onepoint_enquiries successfully, id:", enquiryUuid);
+        }
+
+        // 4B. Dual Sync: NextGen inquiries table (so existing NextGen team dashboard sees it)
+        const userAgent = request.headers.get("user-agent") || "OnePoint Website";
+        const { error: nxgError, status: nxgStatus } = await supabase
+          .from("inquiries")
+          .insert({
+            id: nxgTrackingId,
+            name: fullName,
+            email: email || `${mobileNumber}@onepoint.nextgen.org`,
+            phone: mobileNumber,
+            subject: `OnePoint: ${category} - ${schemeName}`,
+            message: `${detailedDescription} [District: ${fullLocation}] [Contact: ${preferredContactMethod}]`,
+            ip: ip !== "anonymous" ? ip : "web",
+            user_agent: userAgent,
+            status: "new",
+          });
+
+        if (nxgError) {
+          console.warn("[Supabase] NextGen inquiries table sync notice:", nxgError.message);
+        } else if (nxgStatus === 201 || nxgStatus === 200 || !nxgError) {
+          supabaseSynced = true;
+          console.log("[Supabase] Inserted into inquiries successfully, id:", nxgTrackingId);
         }
       } catch (sbErr) {
         console.warn("[Supabase] Insert error caught safely:", sbErr);
