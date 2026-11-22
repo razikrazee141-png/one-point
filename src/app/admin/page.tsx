@@ -29,6 +29,7 @@ import {
   Sparkles,
   PhoneCall,
   Check,
+  CheckCheck,
   Building,
 } from "lucide-react";
 
@@ -45,7 +46,7 @@ interface EnquiryItem {
   education?: string;
   district?: string;
   preferredContact: string;
-  status: "new" | "pending" | "contacted" | "in_progress" | "resolved" | "cancelled" | string;
+  status: "new" | "pending" | "viewed" | "responded" | "contacted" | "in_progress" | "resolved" | "cancelled" | string;
   ip?: string;
   isOnePoint: boolean;
 }
@@ -167,12 +168,44 @@ export default function AdminPage() {
     setActiveEnquiry(null);
   };
 
-  // 5. Open Modal & Initialize Templates
+  // 5. Quick Status Update (Direct 1-Click for Viewed / Responded / etc.)
+  const handleQuickStatusUpdate = async (item: EnquiryItem, newStatus: string) => {
+    // Optimistically update locally
+    setEnquiries((prev) =>
+      prev.map((e) => (e.id === item.id ? { ...e, status: newStatus } : e))
+    );
+
+    if (activeEnquiry && activeEnquiry.id === item.id) {
+      setActiveEnquiry((prev) => (prev ? { ...prev, status: newStatus } : null));
+      setSelectedStatus(newStatus);
+    }
+
+    try {
+      await fetch("/api/admin/enquiries", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: item.id,
+          status: newStatus,
+          phone: item.phone,
+        }),
+      });
+    } catch (err) {
+      console.error("Status update error:", err);
+    }
+  };
+
+  // 6. Open Modal & Initialize Templates
   const handleOpenRespondModal = (item: EnquiryItem) => {
     setActiveEnquiry(item);
     setSelectedStatus(item.status);
     setAdminNote("");
     setSaveSuccessNotice(false);
+
+    // If new or pending, mark as viewed automatically
+    if (item.status === "new" || item.status === "pending") {
+      handleQuickStatusUpdate(item, "viewed");
+    }
 
     // Prepare default response template
     const defaultTemplateText = `Hello ${item.name},
@@ -180,7 +213,7 @@ export default function AdminPage() {
 Thank you for reaching out to ONE POINT – ASSURED TECH ZONE (NextGen Organisation) regarding your enquiry (#${item.id}) for:
 *${item.scheme || item.subject}*.
 
-Our assistance team has received your details. How may we assist you with your application or documentation today?
+Our assistance team has reviewed your details. How may we assist you with your application or documentation today?
 
 Warm regards,
 ONE POINT Support Team
@@ -246,7 +279,7 @@ ONE POINT Team`);
     }
   };
 
-  // 6. Save Status & Note to Database
+  // 7. Save Status & Note to Database
   const handleSaveStatus = async () => {
     if (!activeEnquiry) return;
     setUpdatingStatus(true);
@@ -294,31 +327,49 @@ ONE POINT Team`);
     }
   };
 
-  // 7. Trigger WhatsApp Response
+  // 8. Trigger WhatsApp Response & Auto-mark as Responded
   const handleSendWhatsApp = () => {
     if (!activeEnquiry || !activeEnquiry.phone) return;
     const cleanPhone = activeEnquiry.phone.replace(/[^0-9]/g, "");
     const formattedPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
     const encodedText = encodeURIComponent(customReplyMessage);
     const waUrl = `https://wa.me/${formattedPhone}?text=${encodedText}`;
+
+    // Auto mark as responded
+    if (activeEnquiry.status !== "resolved") {
+      handleQuickStatusUpdate(activeEnquiry, "responded");
+    }
+
     window.open(waUrl, "_blank");
   };
 
-  // 8. Trigger Phone Call
+  // 9. Trigger Phone Call & Auto-mark as Responded
   const handleCall = () => {
     if (!activeEnquiry || !activeEnquiry.phone) return;
+
+    // Auto mark as responded
+    if (activeEnquiry.status !== "resolved") {
+      handleQuickStatusUpdate(activeEnquiry, "responded");
+    }
+
     window.location.href = `tel:${activeEnquiry.phone}`;
   };
 
-  // 9. Trigger Email
+  // 10. Trigger Email & Auto-mark as Responded
   const handleEmail = () => {
     if (!activeEnquiry || !activeEnquiry.email) return;
     const subject = encodeURIComponent(`ONE POINT Assistance: Response to enquiry #${activeEnquiry.id}`);
     const body = encodeURIComponent(customReplyMessage);
+
+    // Auto mark as responded
+    if (activeEnquiry.status !== "resolved") {
+      handleQuickStatusUpdate(activeEnquiry, "responded");
+    }
+
     window.location.href = `mailto:${activeEnquiry.email}?subject=${subject}&body=${body}`;
   };
 
-  // 10. Filtered Enquiries
+  // 11. Filtered Enquiries
   const filteredEnquiries = useMemo(() => {
     return enquiries.filter((item) => {
       // Source filter
@@ -331,7 +382,10 @@ ONE POINT Team`);
         if (statusFilter === "new" && item.status !== "new" && item.status !== "pending") {
           return false;
         }
-        if (statusFilter === "contacted" && item.status !== "contacted") {
+        if (statusFilter === "viewed" && item.status !== "viewed") {
+          return false;
+        }
+        if (statusFilter === "responded" && item.status !== "responded" && item.status !== "contacted") {
           return false;
         }
         if (statusFilter === "in_progress" && item.status !== "in_progress") {
@@ -368,16 +422,19 @@ ONE POINT Team`);
     });
   }, [enquiries, sourceFilter, statusFilter, searchQuery]);
 
-  // Statistics calculation
+  // Statistics calculation with Viewed and Responded counts
   const stats = useMemo(() => {
     const total = enquiries.length;
     const pending = enquiries.filter(
       (e) => e.status === "new" || e.status === "pending"
     ).length;
-    const contacted = enquiries.filter((e) => e.status === "contacted").length;
+    const viewed = enquiries.filter((e) => e.status === "viewed").length;
+    const responded = enquiries.filter(
+      (e) => e.status === "responded" || e.status === "contacted"
+    ).length;
     const inProgress = enquiries.filter((e) => e.status === "in_progress").length;
     const resolved = enquiries.filter((e) => e.status === "resolved").length;
-    return { total, pending, contacted, inProgress, resolved };
+    return { total, pending, viewed, responded, inProgress, resolved };
   }, [enquiries]);
 
   // Export CSV
@@ -425,35 +482,49 @@ ONE POINT Team`);
       case "new":
       case "pending":
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-700 border border-amber-300">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-            New / Action Req
+            New / Unread
           </span>
         );
+      case "viewed":
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+            <Eye className="w-3.5 h-3.5 text-cyan-400" />
+            Viewed
+          </span>
+        );
+      case "responded":
       case "contacted":
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/15 text-blue-700 border border-blue-300">
-            <MessageSquare className="w-3 h-3" />
-            Contacted
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/15 text-blue-300 border border-blue-500/30">
+            <CheckCheck className="w-3.5 h-3.5 text-blue-400" />
+            Responded
           </span>
         );
       case "in_progress":
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-500/15 text-purple-700 border border-purple-300">
-            <Clock className="w-3 h-3" />
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-500/15 text-purple-300 border border-purple-500/30">
+            <Clock className="w-3.5 h-3.5 text-purple-400" />
             In Progress
           </span>
         );
       case "resolved":
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-700 border border-emerald-300">
-            <CheckCircle2 className="w-3 h-3" />
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
             Resolved
+          </span>
+        );
+      case "cancelled":
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-500/15 text-red-300 border border-red-500/30">
+            Cancelled
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-300">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">
             {status}
           </span>
         );
@@ -692,53 +763,65 @@ ONE POINT Team`);
         </div>
 
         {/* Analytics / Stats KPI Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
           {/* Card 1: Total */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-lg relative overflow-hidden">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                Total Enquiries
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                Total
               </span>
               <Building className="w-4 h-4 text-royal-400" />
             </div>
-            <p className="text-3xl font-black text-white mt-2">{stats.total}</p>
-            <p className="text-xs text-slate-500 mt-1">Stored in database</p>
+            <p className="text-2xl sm:text-3xl font-black text-white mt-2">{stats.total}</p>
+            <p className="text-[11px] text-slate-500 mt-1">All submissions</p>
           </div>
 
-          {/* Card 2: Action Required / New */}
-          <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-5 shadow-lg relative overflow-hidden bg-gradient-to-br from-slate-900 to-amber-950/20">
+          {/* Card 2: New / Action Required */}
+          <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-4 sm:p-5 shadow-lg relative overflow-hidden bg-gradient-to-br from-slate-900 to-amber-950/20">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-amber-400 uppercase tracking-wider">
-                New / Pending
+              <span className="text-[11px] font-semibold text-amber-400 uppercase tracking-wider">
+                New / Unread
               </span>
               <Clock className="w-4 h-4 text-amber-400 animate-pulse" />
             </div>
-            <p className="text-3xl font-black text-amber-400 mt-2">{stats.pending}</p>
-            <p className="text-xs text-amber-500/80 mt-1">Awaiting response</p>
+            <p className="text-2xl sm:text-3xl font-black text-amber-400 mt-2">{stats.pending}</p>
+            <p className="text-[11px] text-amber-500/80 mt-1">Needs review</p>
           </div>
 
-          {/* Card 3: Contacted / In Progress */}
-          <div className="bg-slate-900 border border-blue-500/30 rounded-2xl p-5 shadow-lg relative overflow-hidden bg-gradient-to-br from-slate-900 to-blue-950/20">
+          {/* Card 3: Viewed */}
+          <div className="bg-slate-900 border border-cyan-500/30 rounded-2xl p-4 sm:p-5 shadow-lg relative overflow-hidden bg-gradient-to-br from-slate-900 to-cyan-950/20">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-blue-400 uppercase tracking-wider">
-                In Progress
+              <span className="text-[11px] font-semibold text-cyan-400 uppercase tracking-wider">
+                Viewed
               </span>
-              <MessageSquare className="w-4 h-4 text-blue-400" />
+              <Eye className="w-4 h-4 text-cyan-400" />
             </div>
-            <p className="text-3xl font-black text-blue-400 mt-2">{stats.contacted + stats.inProgress}</p>
-            <p className="text-xs text-blue-500/80 mt-1">Engaged with applicant</p>
+            <p className="text-2xl sm:text-3xl font-black text-cyan-400 mt-2">{stats.viewed}</p>
+            <p className="text-[11px] text-cyan-500/80 mt-1">Under review</p>
           </div>
 
-          {/* Card 4: Resolved */}
-          <div className="bg-slate-900 border border-emerald-500/30 rounded-2xl p-5 shadow-lg relative overflow-hidden bg-gradient-to-br from-slate-900 to-emerald-950/20">
+          {/* Card 4: Responded */}
+          <div className="bg-slate-900 border border-blue-500/30 rounded-2xl p-4 sm:p-5 shadow-lg relative overflow-hidden bg-gradient-to-br from-slate-900 to-blue-950/20">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">
+              <span className="text-[11px] font-semibold text-blue-400 uppercase tracking-wider">
+                Responded
+              </span>
+              <CheckCheck className="w-4 h-4 text-blue-400" />
+            </div>
+            <p className="text-2xl sm:text-3xl font-black text-blue-400 mt-2">{stats.responded}</p>
+            <p className="text-[11px] text-blue-500/80 mt-1">Applicant contacted</p>
+          </div>
+
+          {/* Card 5: Resolved */}
+          <div className="bg-slate-900 border border-emerald-500/30 rounded-2xl p-4 sm:p-5 shadow-lg relative overflow-hidden bg-gradient-to-br from-slate-900 to-emerald-950/20 col-span-2 sm:col-span-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider">
                 Resolved
               </span>
               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
             </div>
-            <p className="text-3xl font-black text-emerald-400 mt-2">{stats.resolved}</p>
-            <p className="text-xs text-emerald-500/80 mt-1">Assisted successfully</p>
+            <p className="text-2xl sm:text-3xl font-black text-emerald-400 mt-2">{stats.resolved}</p>
+            <p className="text-[11px] text-emerald-500/80 mt-1">Completed</p>
           </div>
         </div>
 
@@ -761,7 +844,8 @@ ONE POINT Team`);
             {[
               { key: "all", label: "All" },
               { key: "new", label: "New" },
-              { key: "contacted", label: "Contacted" },
+              { key: "viewed", label: "Viewed" },
+              { key: "responded", label: "Responded" },
               { key: "in_progress", label: "In Progress" },
               { key: "resolved", label: "Resolved" },
             ].map((tab) => (
@@ -891,47 +975,69 @@ ONE POINT Team`);
                     </div>
                   </div>
 
-                  {/* Right Column: Action Buttons */}
-                  <div className="flex items-center gap-2.5 flex-shrink-0 self-end lg:self-center">
-                    {/* Quick WhatsApp Button */}
-                    {item.phone && (
+                  {/* Right Column: Quick Status & Action Buttons */}
+                  <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2.5 flex-shrink-0 self-end lg:self-center">
+                    {/* Quick Mark Options */}
+                    <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                      {/* Mark as Viewed */}
                       <button
-                        onClick={() => {
-                          const cleanPhone = item.phone.replace(/[^0-9]/g, "");
-                          const p = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
-                          const defaultMsg = encodeURIComponent(
-                            `Hello ${item.name}, this is One Point – Assured Tech Zone regarding your enquiry #${item.id} for ${item.scheme || item.subject}. How may we assist you?`
-                          );
-                          window.open(`https://wa.me/${p}?text=${defaultMsg}`, "_blank");
-                        }}
-                        title="Quick WhatsApp message"
-                        className="p-3 rounded-xl bg-emerald-600/15 hover:bg-emerald-600/25 text-emerald-400 border border-emerald-500/30 transition-all flex items-center gap-1.5 text-xs font-semibold"
+                        onClick={() => handleQuickStatusUpdate(item, "viewed")}
+                        title="Mark as Viewed"
+                        className={`px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 transition-all ${
+                          item.status === "viewed"
+                            ? "bg-cyan-500/20 text-cyan-300 font-semibold"
+                            : "text-slate-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+                        }`}
                       >
-                        <MessageSquare className="w-4 h-4" />
-                        <span className="hidden sm:inline">WhatsApp</span>
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>Viewed</span>
                       </button>
-                    )}
 
-                    {/* Quick Phone Call Button */}
-                    {item.phone && (
-                      <a
-                        href={`tel:${item.phone}`}
-                        title="Call applicant"
-                        className="p-3 rounded-xl bg-blue-600/15 hover:bg-blue-600/25 text-blue-400 border border-blue-500/30 transition-all flex items-center gap-1.5 text-xs font-semibold"
+                      {/* Mark as Responded */}
+                      <button
+                        onClick={() => handleQuickStatusUpdate(item, "responded")}
+                        title="Mark as Responded"
+                        className={`px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 transition-all ${
+                          item.status === "responded" || item.status === "contacted"
+                            ? "bg-blue-500/20 text-blue-300 font-semibold"
+                            : "text-slate-400 hover:text-blue-300 hover:bg-blue-500/10"
+                        }`}
                       >
-                        <PhoneCall className="w-4 h-4" />
-                        <span className="hidden sm:inline">Call</span>
-                      </a>
-                    )}
+                        <CheckCheck className="w-3.5 h-3.5" />
+                        <span>Responded</span>
+                      </button>
+                    </div>
 
-                    {/* View Details & Respond Button */}
-                    <button
-                      onClick={() => handleOpenRespondModal(item)}
-                      className="px-4 py-3 rounded-xl bg-royal-600 hover:bg-royal-500 text-white font-semibold text-xs tracking-wide shadow-md shadow-royal-600/20 transition-all flex items-center gap-1.5"
-                    >
-                      <span>View &amp; Respond</span>
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                      {/* Quick WhatsApp Button */}
+                      {item.phone && (
+                        <button
+                          onClick={() => {
+                            const cleanPhone = item.phone.replace(/[^0-9]/g, "");
+                            const p = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
+                            const defaultMsg = encodeURIComponent(
+                              `Hello ${item.name}, this is One Point – Assured Tech Zone regarding your enquiry #${item.id} for ${item.scheme || item.subject}. How may we assist you?`
+                            );
+                            handleQuickStatusUpdate(item, "responded");
+                            window.open(`https://wa.me/${p}?text=${defaultMsg}`, "_blank");
+                          }}
+                          title="Quick WhatsApp message & mark as Responded"
+                          className="p-2.5 rounded-xl bg-emerald-600/15 hover:bg-emerald-600/25 text-emerald-400 border border-emerald-500/30 transition-all flex items-center gap-1.5 text-xs font-semibold"
+                        >
+                          <MessageSquare className="w-4 h-4" />
+                          <span className="hidden sm:inline">WhatsApp</span>
+                        </button>
+                      )}
+
+                      {/* View Details & Respond Button */}
+                      <button
+                        onClick={() => handleOpenRespondModal(item)}
+                        className="px-4 py-2.5 rounded-xl bg-royal-600 hover:bg-royal-500 text-white font-semibold text-xs tracking-wide shadow-md shadow-royal-600/20 transition-all flex items-center gap-1.5"
+                      >
+                        <span>View &amp; Respond</span>
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -975,13 +1081,58 @@ ONE POINT Team`);
 
             {/* Modal Body */}
             <div className="p-6 overflow-y-auto space-y-6 flex-1">
+              {/* Quick Status Mark Banner in Modal */}
+              <div className="bg-slate-950 rounded-2xl p-4 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-400 font-medium">Current Status:</span>
+                  {renderStatusBadge(activeEnquiry.status)}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => handleQuickStatusUpdate(activeEnquiry, "viewed")}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition-all ${
+                      activeEnquiry.status === "viewed"
+                        ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/40"
+                        : "bg-slate-900 hover:bg-slate-800 text-slate-300 border-slate-700"
+                    }`}
+                  >
+                    <Eye className="w-3.5 h-3.5 text-cyan-400" />
+                    Mark as Viewed
+                  </button>
+
+                  <button
+                    onClick={() => handleQuickStatusUpdate(activeEnquiry, "responded")}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition-all ${
+                      activeEnquiry.status === "responded" || activeEnquiry.status === "contacted"
+                        ? "bg-blue-500/20 text-blue-300 border-blue-500/40"
+                        : "bg-slate-900 hover:bg-slate-800 text-slate-300 border-slate-700"
+                    }`}
+                  >
+                    <CheckCheck className="w-3.5 h-3.5 text-blue-400" />
+                    Mark as Responded
+                  </button>
+
+                  <button
+                    onClick={() => handleQuickStatusUpdate(activeEnquiry, "resolved")}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition-all ${
+                      activeEnquiry.status === "resolved"
+                        ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+                        : "bg-slate-900 hover:bg-slate-800 text-slate-300 border-slate-700"
+                    }`}
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                    Mark as Resolved
+                  </button>
+                </div>
+              </div>
+
               {/* Applicant Summary Dossier */}
               <div className="bg-slate-950 rounded-2xl p-5 border border-slate-800 space-y-4">
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
                     Applicant Information
                   </h4>
-                  {renderStatusBadge(activeEnquiry.status)}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
@@ -1047,11 +1198,12 @@ ONE POINT Team`);
                       onChange={(e) => setSelectedStatus(e.target.value)}
                       className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-royal-500"
                     >
-                      <option value="new">New / Action Required</option>
-                      <option value="contacted">Contacted Applicant</option>
-                      <option value="in_progress">In Progress (Processing)</option>
-                      <option value="resolved">Resolved / Completed</option>
-                      <option value="cancelled">Cancelled / Disqualified</option>
+                      <option value="new">New / Unread</option>
+                      <option value="viewed">Viewed (Under Review)</option>
+                      <option value="responded">Responded (Contacted)</option>
+                      <option value="in_progress">In Progress (Documentation / Processing)</option>
+                      <option value="resolved">Resolved (Completed)</option>
+                      <option value="cancelled">Cancelled</option>
                     </select>
                   </div>
 

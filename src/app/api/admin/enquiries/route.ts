@@ -171,12 +171,25 @@ export async function PATCH(request: Request) {
       console.warn("[Admin API] Failed to update inquiries table:", inqErr.message);
     }
 
-    // 2. Also try updating onepoint_enquiries if phone matches
+    // 2. Also update onepoint_enquiries if phone matches
     if (phone) {
       try {
+        let opStatus = "reviewed";
+        if (status === "new" || status === "pending") {
+          opStatus = "pending";
+        } else if (status === "resolved") {
+          opStatus = "resolved";
+        } else if (status === "cancelled") {
+          opStatus = "cancelled";
+        } else if (status === "in_progress") {
+          opStatus = "in_progress";
+        } else if (status === "viewed" || status === "responded" || status === "contacted") {
+          opStatus = "reviewed";
+        }
+
         await supabase
           .from("onepoint_enquiries")
-          .update({ status: status === "new" ? "pending" : status })
+          .update({ status: opStatus })
           .eq("phone_number", phone);
       } catch (_) {}
     }
