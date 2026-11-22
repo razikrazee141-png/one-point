@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import OnePointLogo from "@/components/OnePointLogo";
 import {
   Shield,
   Lock,
@@ -550,17 +551,9 @@ ONE POINT Team`);
         <div className="w-full max-w-md">
           {/* Brand Header */}
           <div className="text-center mb-8">
-            <Link href="/" className="inline-block group mb-4">
-              <div className="relative w-48 h-14 mx-auto">
-                <Image
-                  src="/images/logo.png"
-                  alt="ONE POINT – ASSURED TECH ZONE"
-                  fill
-                  className="object-contain filter drop-shadow-md group-hover:scale-105 transition-transform"
-                  priority
-                />
-              </div>
-            </Link>
+            <div className="mb-4 flex justify-center">
+              <OnePointLogo size="lg" variant="dark-bg" showTagline={false} />
+            </div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-royal-500/10 border border-royal-500/30 text-royal-400 text-xs font-semibold tracking-wider uppercase mb-2">
               <Shield className="w-3.5 h-3.5" />
               Restricted Admin Control Center
@@ -675,15 +668,7 @@ ONE POINT Team`);
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
           {/* Logo & Brand */}
           <div className="flex items-center gap-4">
-            <Link href="/" className="relative w-36 h-10 block">
-              <Image
-                src="/images/logo.png"
-                alt="OnePoint"
-                fill
-                className="object-contain"
-                priority
-              />
-            </Link>
+            <OnePointLogo size="sm" variant="dark-bg" showTagline={false} />
             <div className="hidden sm:flex items-center gap-2 pl-4 border-l border-slate-700/80">
               <span className="px-2.5 py-0.5 rounded-md bg-royal-500/20 text-royal-300 font-mono text-xs font-semibold uppercase tracking-wider border border-royal-500/30">
                 Admin Zone

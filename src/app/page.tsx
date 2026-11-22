@@ -9,6 +9,7 @@ import SchemeCard from "@/components/SchemeCard";
 import EnquiryModal from "@/components/EnquiryModal";
 import IndependentDisclaimerBanner from "@/components/IndependentDisclaimerBanner";
 import WhatsAppIcon from "@/components/WhatsAppIcon";
+import OnePointLogo from "@/components/OnePointLogo";
 import {
   GraduationCap,
   Building2,
@@ -203,6 +204,11 @@ export default function HomePage() {
             
             {/* Left Column: Headline, Description & CTAs */}
             <div className="lg:col-span-7 space-y-6 text-left">
+              {/* Authentic OnePoint Vector Brand Mark */}
+              <div className="mb-2">
+                <OnePointLogo size="lg" variant="dark-bg" showTagline={false} />
+              </div>
+
               {/* Category Pill */}
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-[#FF963F]/40 backdrop-blur-md shadow-sm">
                 <span className="w-2 h-2 rounded-full bg-[#FF963F] animate-pulse" />
