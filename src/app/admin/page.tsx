@@ -31,6 +31,7 @@ import {
   PhoneCall,
   Check,
   CheckCheck,
+  Copy,
   Building,
 } from "lucide-react";
 
@@ -51,6 +52,33 @@ interface EnquiryItem {
   ip?: string;
   isOnePoint: boolean;
 }
+
+// Official WhatsApp Greeting & Query Template with Autofilled Full Name
+const getWelcomeTemplate = (fullName: string) => `Hello *${fullName}*! 👋
+
+Thank you for contacting *ONEPOINT – ASSURED TECH ZONE.*
+
+We have successfully received your enquiry through our website.
+
+To help us assist you better, could you please tell us:
+
+*What is your query or what kind of assistance are you looking for?*
+
+You may briefly describe your requirements, whether related to:
+
+🎓 Education & Scholarships
+🏛️ Government Schemes
+💻 Digital Services
+🚀 Student & Career Guidance
+📄 Other Assistance
+
+Simply reply to this message with your query. Our team will review it and get back to you shortly.
+
+Thank you for choosing *ONEPOINT!*
+
+*An initiative of NextGen Organisation.*
+
+*Everything You Need. All in One Point.*`;
 
 export default function AdminPage() {
   // Authentication states
@@ -81,8 +109,46 @@ export default function AdminPage() {
   const [selectedStatus, setSelectedStatus] = useState<string>("");
   const [adminNote, setAdminNote] = useState("");
   const [customReplyMessage, setCustomReplyMessage] = useState("");
-  const [activeTemplate, setActiveTemplate] = useState<string>("acknowledgement");
+  const [activeTemplate, setActiveTemplate] = useState<string>("welcome");
   const [saveSuccessNotice, setSaveSuccessNotice] = useState(false);
+  const [imageCopied, setImageCopied] = useState(false);
+
+  // Copy Welcome Poster to Clipboard for WhatsApp attachment
+  const handleCopyWelcomeImage = async () => {
+    try {
+      const response = await fetch("/images/onepoint-welcome-card.jpg");
+      const blob = await response.blob();
+      try {
+        await navigator.clipboard.write([
+          new ClipboardItem({ [blob.type]: blob }),
+        ]);
+        setImageCopied(true);
+        setTimeout(() => setImageCopied(false), 2500);
+      } catch {
+        const img = new window.Image();
+        img.crossOrigin = "anonymous";
+        img.src = "/images/onepoint-welcome-card.jpg";
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext("2d");
+          ctx?.drawImage(img, 0, 0);
+          canvas.toBlob(async (pngBlob) => {
+            if (pngBlob) {
+              await navigator.clipboard.write([
+                new ClipboardItem({ "image/png": pngBlob }),
+              ]);
+              setImageCopied(true);
+              setTimeout(() => setImageCopied(false), 2500);
+            }
+          }, "image/png");
+        };
+      }
+    } catch {
+      alert("Please use the 'Download Poster' button to save and attach the image.");
+    }
+  };
 
   // 1. Check Session on mount
   useEffect(() => {
@@ -208,20 +274,11 @@ export default function AdminPage() {
       handleQuickStatusUpdate(item, "viewed");
     }
 
-    // Prepare default response template
-    const defaultTemplateText = `Hello ${item.name},
-
-Thank you for reaching out to ONE POINT – ASSURED TECH ZONE (NextGen Organisation) regarding your enquiry (#${item.id}) for:
-*${item.scheme || item.subject}*.
-
-Our assistance team has reviewed your details. How may we assist you with your application or documentation today?
-
-Warm regards,
-ONE POINT Support Team
-NextGen Organisation`;
+    // Prepare default response template with autofilled applicant name
+    const defaultTemplateText = getWelcomeTemplate(item.name || "Student");
 
     setCustomReplyMessage(defaultTemplateText);
-    setActiveTemplate("acknowledgement");
+    setActiveTemplate("welcome");
   };
 
   // Switch response template
@@ -229,10 +286,12 @@ NextGen Organisation`;
     if (!activeEnquiry) return;
     setActiveTemplate(templateKey);
 
-    const name = activeEnquiry.name;
+    const name = activeEnquiry.name || "Student";
     const scheme = activeEnquiry.scheme || activeEnquiry.subject;
 
-    if (templateKey === "acknowledgement") {
+    if (templateKey === "welcome") {
+      setCustomReplyMessage(getWelcomeTemplate(name));
+    } else if (templateKey === "acknowledgement") {
       setCustomReplyMessage(`Hello ${name},
 
 Thank you for contacting ONE POINT – ASSURED TECH ZONE (NextGen Organisation) regarding your enquiry (#${activeEnquiry.id}) for:
@@ -1001,7 +1060,7 @@ ONE POINT Team`);
                             const cleanPhone = item.phone.replace(/[^0-9]/g, "");
                             const p = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
                             const defaultMsg = encodeURIComponent(
-                              `Hello ${item.name}, this is One Point – Assured Tech Zone regarding your enquiry #${item.id} for ${item.scheme || item.subject}. How may we assist you?`
+                              getWelcomeTemplate(item.name || "Student")
                             );
                             handleQuickStatusUpdate(item, "responded");
                             window.open(`https://wa.me/${p}?text=${defaultMsg}`, "_blank");
@@ -1245,6 +1304,7 @@ ONE POINT Team`);
                   <span className="text-xs text-slate-400 block mb-2">Select Response Template:</span>
                   <div className="flex flex-wrap gap-2">
                     {[
+                      { key: "welcome", label: "Official Welcome & Query" },
                       { key: "acknowledgement", label: "Acknowledgement" },
                       { key: "documents", label: "Required Documents" },
                       { key: "portal", label: "Portal Guidance" },
@@ -1265,11 +1325,61 @@ ONE POINT Team`);
                   </div>
                 </div>
 
+                {/* Attached Official Welcome Poster Card */}
+                <div className="bg-slate-900/90 rounded-2xl p-3.5 border border-purple-500/30 flex flex-col sm:flex-row items-center gap-4">
+                  <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden border border-purple-400/40 shadow-lg shrink-0">
+                    <Image
+                      src="/images/onepoint-welcome-card.jpg"
+                      alt="ONEPOINT Welcome Poster"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="space-y-1.5 flex-1 text-center sm:text-left">
+                    <div className="flex items-center justify-center sm:justify-start gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                      <span className="text-xs font-bold text-white uppercase tracking-wider">
+                        Attached Official Welcome Poster
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-300 leading-relaxed">
+                      Attach this visual with your message on WhatsApp. Click <strong>Copy Image</strong>, then paste (<kbd className="px-1 py-0.5 bg-slate-800 rounded text-[10px] text-royal-300 border border-slate-700">Ctrl+V</kbd>) into the WhatsApp chat along with the message below.
+                    </p>
+                    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={handleCopyWelcomeImage}
+                        className="px-3 py-1.5 rounded-lg bg-royal-600/25 hover:bg-royal-600/35 text-royal-300 border border-royal-500/40 text-[11px] font-semibold transition-all flex items-center gap-1.5 active:scale-95"
+                      >
+                        {imageCopied ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-emerald-400" />
+                            <span className="text-emerald-300">Copied to Clipboard!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3.5 h-3.5" />
+                            <span>Copy Image</span>
+                          </>
+                        )}
+                      </button>
+                      <a
+                        href="/images/onepoint-welcome-card.jpg"
+                        download="onepoint-welcome-poster.jpg"
+                        className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[11px] font-semibold transition-all flex items-center gap-1.5"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span>Download Poster</span>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Message Textarea */}
                 <div>
                   <label className="block text-xs text-slate-400 mb-1.5">Custom Reply Message (Editable)</label>
                   <textarea
-                    rows={6}
+                    rows={10}
                     value={customReplyMessage}
                     onChange={(e) => setCustomReplyMessage(e.target.value)}
                     className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-royal-500 font-sans leading-relaxed"
