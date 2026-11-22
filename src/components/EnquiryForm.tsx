@@ -271,21 +271,17 @@ export default function EnquiryForm({
       <div className="border-b border-slate-100 pb-5 mb-6">
         <div className="flex items-center justify-between gap-2 mb-1">
           <span className="text-xs font-bold text-blue-700 uppercase tracking-wider">
-            {resolvedFormType === "student_application"
-              ? "Student Scheme Application"
-              : resolvedFormType === "service_request"
-              ? "Service Request Desk"
-              : "Direct Assistance Form"}
+            One Point Assistance Desk
           </span>
           <span className="text-[11px] bg-amber-50 text-amber-700 border border-amber-200/80 px-2 py-0.5 rounded font-medium">
-            Independent Facilitation
+            Direct Team Contact
           </span>
         </div>
         <h3 className="text-xl font-bold text-slate-900">
-          {isSchemePage ? "Apply / Enquire for This Scheme" : "Submit An Enquiry"}
+          {isSchemePage ? "Enquire About This Opportunity" : "General Enquiry Form"}
         </h3>
         <p className="text-xs text-slate-500 mt-1">
-          Fill in your details below. Our team at One Point Assured Tech Zone will guide you through the process.
+          Fill in your details below. Our team at One Point Assured Tech Zone will review your query and reach out to you directly.
         </p>
       </div>
 
@@ -577,11 +573,7 @@ export default function EnquiryForm({
             ) : (
               <>
                 <Send className="w-4 h-4" />
-                <span>
-                  {resolvedFormType === "student_application"
-                    ? "Submit Scheme Application"
-                    : "Submit Scheme Enquiry"}
-                </span>
+                <span>Submit Enquiry / Request Contact</span>
               </>
             )}
           </button>

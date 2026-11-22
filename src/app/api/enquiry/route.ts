@@ -8,21 +8,18 @@ interface EnquiryPayload {
   district: string;
   taluk?: string;
   qualification?: string;
-  institutionName?: string;
-  dateOfBirth?: string;
   schemeName: string;
   category?: string;
   message: string;
   consent: boolean;
-  formType?: "enquiry" | "student_application" | "service_request";
-  preferredContactMethod?: "whatsapp" | "phone" | "email";
+  preferredContactMethod?: "whatsapp" | "phone";
   website_honeypot?: string; // Anti-spam trap
 }
 
 // In-memory rate limiting map for basic spam protection (by IP / mobile)
 const rateLimitMap = new Map<string, { count: number; lastTime: number }>();
 
-function isRateLimited(key: string, limit = 5, windowMs = 60000): boolean {
+function isRateLimited(key: string, limit = 6, windowMs = 60000): boolean {
   const now = Date.now();
   const entry = rateLimitMap.get(key);
 
@@ -76,14 +73,12 @@ export async function POST(request: Request) {
     const fullName = (body.fullName || "").trim();
     const mobileNumber = (body.mobileNumber || "").replace(/[^0-9]/g, "");
     const district = (body.district || "").trim();
-    const schemeName = (body.schemeName || "General Service Assistance").trim();
+    const schemeName = (body.schemeName || "General Service Enquiry").trim();
     const message = (body.message || "").trim();
     const email = (body.email || "").trim() || null;
     const taluk = (body.taluk || "").trim();
     const qualification = (body.qualification || "").trim();
-    const institutionName = (body.institutionName || "").trim();
-    const dateOfBirth = (body.dateOfBirth || "").trim() || null;
-    const category = (body.category || "other-opportunities").trim();
+    const category = (body.category || "General Assistance").trim();
     const preferredContactMethod = body.preferredContactMethod || "whatsapp";
     const consent = Boolean(body.consent);
 
@@ -129,115 +124,56 @@ export async function POST(request: Request) {
       );
     }
 
-    // 3. Generate unique submission tracking ID
+    // 3. Generate unique submission tracking ID (e.g. OP-2611-9482)
     const timestamp = new Date();
     const idPrefix = "OP";
     const dateSegment = `${timestamp.getFullYear().toString().slice(-2)}${(timestamp.getMonth() + 1).toString().padStart(2, "0")}`;
     const randomSegment = Math.floor(1000 + Math.random() * 9000);
     const submissionId = `${idPrefix}-${dateSegment}-${randomSegment}`;
 
-    let supabaseTargetTable = "onepoint_enquiries";
-    let supabaseRecordId: string | null = null;
     let supabaseSynced = false;
-    let supabaseNotice: string | null = null;
+    let supabaseRecordId: string | null = null;
 
-    // 4. Supabase Database Integration
+    // 4. Record into Supabase onepoint_enquiries table
     const supabase = getSupabase();
     if (supabase) {
       try {
-        const isSchemeApplication =
-          body.formType === "student_application" ||
-          category === "scholarships" ||
-          category === "education-loans" ||
-          category === "admissions" ||
-          (schemeName && schemeName !== "General Service Assistance" && schemeName !== "General Tech Zone / Student Assistance");
+        const fullLocation = district + (taluk ? `, ${taluk}` : "");
+        const detailedDescription = [
+          schemeName && schemeName !== "General Service Enquiry" ? `[Scheme: ${schemeName}]` : null,
+          qualification ? `[Education: ${qualification}]` : null,
+          message,
+        ]
+          .filter(Boolean)
+          .join(" ");
 
-        const isServiceRequest =
-          body.formType === "service_request" ||
-          category === "digital-services" ||
-          category === "technology-solutions";
+        const { data, error } = await supabase
+          .from("onepoint_enquiries")
+          .insert({
+            full_name: fullName,
+            phone_number: mobileNumber,
+            email: email,
+            location: fullLocation,
+            service_category: category,
+            service_description: detailedDescription,
+            preferred_contact_method: preferredContactMethod,
+            status: "pending",
+          })
+          .select("id")
+          .single();
 
-        if (isServiceRequest) {
-          supabaseTargetTable = "onepoint_service_requests";
-          const { data, error } = await supabase
-            .from("onepoint_service_requests")
-            .insert({
-              full_name: fullName,
-              phone_number: mobileNumber,
-              email: email,
-              service_type: schemeName,
-              description: `${message}${district ? ` [District: ${district}${taluk ? `, ${taluk}` : ""}]` : ""}`,
-              status: "pending",
-            })
-            .select("id")
-            .single();
-
-          if (error) {
-            console.warn("[Supabase] onepoint_service_requests insert:", error.message);
-            supabaseNotice = error.message;
-          } else if (data) {
-            supabaseRecordId = data.id;
-            supabaseSynced = true;
-          }
-        } else if (isSchemeApplication) {
-          supabaseTargetTable = "onepoint_student_applications";
-          const { data, error } = await supabase
-            .from("onepoint_student_applications")
-            .insert({
-              full_name: fullName,
-              phone_number: mobileNumber,
-              email: email,
-              date_of_birth: dateOfBirth,
-              education_level: qualification || null,
-              institution_name: institutionName || taluk || null,
-              district: district,
-              application_type: category,
-              scheme_name: schemeName,
-              additional_information: message,
-              status: "pending",
-            })
-            .select("id")
-            .single();
-
-          if (error) {
-            console.warn("[Supabase] onepoint_student_applications insert:", error.message);
-            supabaseNotice = error.message;
-          } else if (data) {
-            supabaseRecordId = data.id;
-            supabaseSynced = true;
-          }
-        } else {
-          // General Enquiry -> onepoint_enquiries
-          supabaseTargetTable = "onepoint_enquiries";
-          const { data, error } = await supabase
-            .from("onepoint_enquiries")
-            .insert({
-              full_name: fullName,
-              phone_number: mobileNumber,
-              email: email,
-              location: `${district}${taluk ? `, ${taluk}` : ""}`,
-              service_category: category,
-              service_description: `[Scheme: ${schemeName}] ${message}`,
-              preferred_contact_method: preferredContactMethod,
-              status: "pending",
-            })
-            .select("id")
-            .single();
-
-          if (error) {
-            console.warn("[Supabase] onepoint_enquiries insert:", error.message);
-            supabaseNotice = error.message;
-          } else if (data) {
-            supabaseRecordId = data.id;
-            supabaseSynced = true;
-          }
+        if (error) {
+          console.warn("[Supabase] onepoint_enquiries notice:", error.message);
+        } else if (data) {
+          supabaseSynced = true;
+          supabaseRecordId = data.id;
         }
       } catch (sbErr) {
-        console.error("[Supabase] Execution error:", sbErr);
+        console.warn("[Supabase] Insert error caught safely:", sbErr);
       }
     }
 
-    // 5. Optional Secondary Sync: Google Form
+    // 5. Optional Secondary Sync: Google Form / Google Apps Script if URLs are provided
     const googleFormUrl = process.env.GOOGLE_FORM_URL;
     if (googleFormUrl && googleFormUrl.includes("formResponse")) {
       try {
@@ -264,60 +200,27 @@ export async function POST(request: Request) {
           body: formParams.toString(),
           mode: "no-cors",
           signal: AbortSignal.timeout(6000),
-        }).catch((err) => console.warn("[Google Form] Background sync notice:", err));
-      } catch (gErr) {
-        console.warn("[Google Form] Sync error:", gErr);
-      }
-    }
-
-    // 6. Optional Secondary Sync: Google Apps Script
-    const googleAppsScriptUrl = process.env.GOOGLE_APPS_SCRIPT_URL;
-    if (googleAppsScriptUrl && googleAppsScriptUrl.startsWith("http")) {
-      try {
-        fetch(googleAppsScriptUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            submissionId,
-            timestamp: new Intl.DateTimeFormat("en-IN", {
-              dateStyle: "medium",
-              timeStyle: "medium",
-              timeZone: "Asia/Kolkata",
-            }).format(timestamp),
-            fullName,
-            mobileNumber,
-            email: email || "",
-            district,
-            taluk,
-            qualification,
-            schemeName,
-            category,
-            message,
-            consent,
-            status: "New",
-          }),
-          signal: AbortSignal.timeout(6000),
-        }).catch((err) => console.warn("[Google Apps Script] Background sync notice:", err));
-      } catch (gasErr) {
-        console.warn("[Google Apps Script] Sync error:", gasErr);
-      }
+        }).catch(() => {});
+      } catch (_) {}
     }
 
     return NextResponse.json({
       success: true,
       submissionId,
-      supabaseTable: supabaseTargetTable,
       supabaseSynced,
       supabaseRecordId,
-      notice: supabaseNotice ? "Database tables pending SQL migration" : undefined,
-      message: "Enquiry registered successfully! Your tracking ID is " + submissionId + ".",
+      message:
+        "Thank you! Your enquiry has been registered with ID " +
+        submissionId +
+        ". Our One Point team will reach out to you shortly.",
     });
   } catch (error) {
     console.error("Enquiry API fatal error:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "An unexpected error occurred while submitting your enquiry. Please try again or chat directly on WhatsApp at 8197803617.",
+        error:
+          "An unexpected error occurred while submitting your enquiry. Please try again or chat directly with us on WhatsApp at 8197803617.",
       },
       { status: 500 }
     );
