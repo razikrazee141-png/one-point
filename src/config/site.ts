@@ -33,10 +33,10 @@ export interface SiteConfig {
 }
 
 export const siteConfig: SiteConfig = {
-  name: "ONE POINT",
+  name: "ONEPOINT",
   descriptor: "ASSURED TECH ZONE",
-  fullName: "ONE POINT – ASSURED TECH ZONE",
-  tagline: "Education. Empowerment. Digital Accessibility.",
+  fullName: "ONEPOINT – ASSURED TECH ZONE",
+  tagline: "Everything You Need. All in One Point.",
   supportingStatement: "One destination. Multiple solutions. Better opportunities.",
   parentOrg: "NextGen Organisation",
   disclaimer:

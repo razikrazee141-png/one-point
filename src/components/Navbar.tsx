@@ -36,24 +36,25 @@ export default function Navbar() {
 
   const navLinks = [
     { label: "Home", href: "/" },
-    { label: "About Us", href: "/about" },
+    { label: "About", href: "/about" },
     { label: "Services", href: "/services" },
-    { label: "Schemes & Opportunities", href: "/schemes" },
+    { label: "Education", href: "/schemes?category=scholarships" },
+    { label: "Government Schemes", href: "/schemes?category=government-welfare" },
     { label: "Contact", href: "/contact" },
   ];
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full transition-all duration-200">
+      <header className="sticky top-0 z-50 w-full transition-all duration-300">
         {/* Top Official Portal Header Bar */}
-        <div className="bg-slate-950 text-slate-300 py-1.5 px-4 text-[11px] sm:text-xs border-b border-slate-800">
+        <div className="bg-[#0D081D] text-slate-300 py-1.5 px-4 text-[11px] sm:text-xs border-b border-purple-950/60">
           <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
             <div className="flex items-center gap-2 truncate">
-              <span className="inline-flex items-center gap-1 font-bold text-amber-400 bg-amber-950/80 border border-amber-800/80 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider shrink-0">
-                <ShieldCheck className="w-3 h-3 text-amber-400" /> Official Service Hub
+              <span className="inline-flex items-center gap-1 font-bold text-[#FF963F] bg-[#FF963F]/15 border border-[#FF963F]/30 px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider shrink-0">
+                <ShieldCheck className="w-3 h-3 text-[#FF963F]" /> Official Platform
               </span>
               <span className="truncate text-slate-300 font-medium">
-                Karnataka Digital Assistance &amp; Student Support Network • <span className="text-slate-400">NextGen Organisation</span>
+                Digital Public Service &amp; Student Support Platform • <span className="text-[#8E78E6]">NextGen Organisation</span>
               </span>
             </div>
 
@@ -62,7 +63,7 @@ export default function Navbar() {
               <Link href="/about" className="text-slate-400 hover:text-white transition-colors">
                 Public Mandate
               </Link>
-              <span className="text-slate-700">•</span>
+              <span className="text-purple-900">•</span>
               <a
                 href={siteConfig.contact.whatsappUrl}
                 target="_blank"
@@ -77,17 +78,19 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Main Navbar */}
+        {/* Main Sticky Navbar (Midnight Navy with Glassmorphism) */}
         <nav
-          className={`bg-white/95 backdrop-blur-md transition-shadow duration-200 border-b border-slate-200/90 ${
-            scrolled ? "shadow-md" : "shadow-xs"
+          className={`transition-all duration-300 border-b ${
+            scrolled
+              ? "bg-[#130D29]/95 backdrop-blur-xl border-purple-900/30 shadow-xl py-3"
+              : "bg-[#130D29]/80 backdrop-blur-md border-white/10 py-4"
           }`}
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-20">
+            <div className="flex items-center justify-between">
               {/* Brand Logo with Authentic ONE POINT Typography */}
               <div className="flex-shrink-0">
-                <BrandLogo showTagline={true} size="md" />
+                <BrandLogo showTagline={true} variant="light" size="md" />
               </div>
 
               {/* Desktop Nav Links */}
@@ -100,8 +103,8 @@ export default function Navbar() {
                       href={link.href}
                       className={`px-3.5 py-2 rounded-xl text-xs xl:text-sm font-semibold tracking-wide transition-all ${
                         isActive
-                          ? "text-royal-800 bg-royal-50 font-bold border border-royal-200/60 shadow-xs"
-                          : "text-slate-700 hover:text-royal-700 hover:bg-slate-50"
+                          ? "text-[#FF963F] bg-white/10 font-bold border border-[#FF963F]/30 shadow-xs"
+                          : "text-slate-200 hover:text-white hover:bg-white/5"
                       }`}
                     >
                       {link.label}
@@ -117,20 +120,20 @@ export default function Navbar() {
                   href={siteConfig.contact.whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100/80 text-emerald-800 text-xs font-bold border border-emerald-300/80 transition-all shadow-xs"
+                  className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-500/30 transition-all"
                   title="Official OnePoint WhatsApp Channel"
                 >
-                  <WhatsAppIcon className="w-4 h-4 fill-emerald-600" />
+                  <WhatsAppIcon className="w-4 h-4 fill-emerald-400" />
                   <span>WhatsApp Desk</span>
                 </a>
 
-                {/* Primary CTA */}
+                {/* Primary CTA (Vibrant Purple & Orange Gradient) */}
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(true)}
-                  className="inline-flex items-center gap-2 px-4.5 py-2.5 rounded-xl bg-gradient-to-r from-royal-700 to-navy-900 hover:from-royal-600 hover:to-navy-800 text-white text-xs font-bold uppercase tracking-wider transition-all shadow-sm hover:shadow-md active:scale-95 cursor-pointer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#6546C8] to-[#FF963F] hover:from-[#5435B5] hover:to-[#F28528] text-white text-xs font-extrabold uppercase tracking-wider transition-all shadow-lg shadow-orange-500/20 hover:scale-[1.02] active:scale-95 cursor-pointer"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                  <Sparkles className="w-3.5 h-3.5 text-white" />
                   <span>Get Assistance</span>
                 </button>
               </div>
@@ -141,16 +144,16 @@ export default function Navbar() {
                   href={siteConfig.contact.whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700"
+                  className="p-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400"
                   title="Official WhatsApp"
                 >
-                  <WhatsAppIcon className="w-5 h-5 fill-emerald-600" />
+                  <WhatsAppIcon className="w-5 h-5 fill-emerald-400" />
                 </a>
 
                 <button
                   type="button"
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="p-2 rounded-xl text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+                  className="p-2 rounded-xl text-slate-200 hover:text-white hover:bg-white/10 transition-colors"
                   aria-label="Toggle navigation menu"
                 >
                   {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -161,7 +164,7 @@ export default function Navbar() {
 
           {/* Mobile Drawer */}
           {mobileMenuOpen && (
-            <div className="lg:hidden bg-white border-b border-slate-200 px-4 pt-2 pb-6 space-y-2 animate-fade-in shadow-xl">
+            <div className="lg:hidden bg-[#130D29] border-b border-purple-900/40 px-4 pt-3 pb-6 space-y-2 animate-fade-in shadow-2xl">
               <div className="p-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
                 Official Navigation
               </div>
@@ -173,8 +176,8 @@ export default function Navbar() {
                     href={link.href}
                     className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold ${
                       isActive
-                        ? "bg-royal-50 text-royal-800 font-bold border border-royal-200"
-                        : "text-slate-700 hover:bg-slate-50"
+                        ? "bg-purple-900/40 text-[#FF963F] font-bold border border-[#FF963F]/30"
+                        : "text-slate-200 hover:bg-white/5"
                     }`}
                   >
                     <span>{link.label}</span>
@@ -183,7 +186,7 @@ export default function Navbar() {
                 );
               })}
 
-              <div className="pt-4 border-t border-slate-100 space-y-2.5">
+              <div className="pt-4 border-t border-purple-900/40 space-y-2.5">
                 {/* Official WhatsApp Button for Mobile (NO raw number) */}
                 <a
                   href={siteConfig.contact.whatsappUrl}
@@ -201,10 +204,10 @@ export default function Navbar() {
                     setMobileMenuOpen(false);
                     setIsModalOpen(true);
                   }}
-                  className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-royal-700 to-navy-900 text-white font-bold text-sm shadow-md cursor-pointer"
+                  className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-[#6546C8] to-[#FF963F] text-white font-bold text-sm shadow-md cursor-pointer"
                 >
-                  <Sparkles className="w-4 h-4 text-amber-300" />
-                  <span>Request Scheme Facilitation</span>
+                  <Sparkles className="w-4 h-4 text-white" />
+                  <span>Request Student / Public Assistance</span>
                 </button>
               </div>
             </div>

@@ -1,42 +1,60 @@
 @import "tailwindcss";
 
+@theme {
+  --color-midnight: #130D29;
+  --color-midnight-light: #1D143D;
+  --color-midnight-dark: #0D081D;
+  --color-purple-royal: #6546C8;
+  --color-purple-hover: #5435B5;
+  --color-purple-muted: #8E78E6;
+  --color-orange-vibrant: #FF963F;
+  --color-orange-hover: #F28528;
+  --color-lavender-soft: #F0EBFF;
+  --color-lavender-card: #F8F5FF;
+  --color-dark-text: #191725;
+}
+
 @layer base {
   :root {
-    --navy-950: #070d1e;
-    --navy-900: #0b152d;
-    --navy-800: #102144;
-    --navy-700: #1b356b;
-    --royal-600: #2563eb;
-    --royal-500: #3b82f6;
-    --brand-red: #e11d48;
-    --brand-gold: #f59e0b;
+    --midnight: #130D29;
+    --royal-purple: #6546C8;
+    --vibrant-orange: #FF963F;
+    --soft-lavender: #F0EBFF;
+    --dark-text: #191725;
+  }
+
+  html {
+    scroll-behavior: smooth;
   }
 
   body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--dark-text);
+    background-color: #ffffff;
+    overflow-x: hidden;
   }
 }
 
-/* Custom subtle scrollbar */
+/* Custom luxury scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #130D29;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #6546C8;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #FF963F;
 }
 
-/* Animation utilities */
+/* Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -44,6 +62,53 @@
   }
 }
 
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
 .animate-fade-in {
-  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-float {
+  animation: floatSlow 5s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: floatSlow 6s ease-in-out 2s infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+
+/* Glassmorphism helpers */
+.glass-panel-dark {
+  background: rgba(19, 13, 41, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.glass-panel-light {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(101, 70, 200, 0.15);
 }
