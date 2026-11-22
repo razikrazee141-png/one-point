@@ -9,6 +9,7 @@ interface EnquiryModalProps {
   onClose: () => void;
   schemeTitle?: string;
   schemeCategory?: string;
+  formType?: "enquiry" | "student_application" | "service_request";
 }
 
 export default function EnquiryModal({
@@ -16,6 +17,7 @@ export default function EnquiryModal({
   onClose,
   schemeTitle = "General Service Assistance",
   schemeCategory = "other-opportunities",
+  formType,
 }: EnquiryModalProps) {
   // Close modal on escape key
   useEffect(() => {
@@ -75,6 +77,7 @@ export default function EnquiryModal({
           <EnquiryForm
             initialSchemeName={schemeTitle}
             initialCategory={schemeCategory}
+            formType={formType}
             isSchemePage={schemeTitle !== "General Service Assistance"}
             className="border-0 shadow-none p-4"
           />

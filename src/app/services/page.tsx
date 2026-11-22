@@ -320,6 +320,7 @@ export default function ServicesPage() {
           onClose={() => setSelectedService(null)}
           schemeTitle={`Service Assistance: ${selectedService.name}`}
           schemeCategory={selectedService.category}
+          formType="service_request"
         />
       )}
     </div>
