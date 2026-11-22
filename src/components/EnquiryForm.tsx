@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { siteConfig } from "@/config/site";
+import WhatsAppIcon from "./WhatsAppIcon";
 import {
   Send,
   CheckCircle2,
@@ -229,16 +230,16 @@ export default function EnquiryForm({
           </span>
         </div>
 
-        {/* Instant WhatsApp Follow-up button */}
+        {/* Official WhatsApp Follow-up button (No raw phone number) */}
         <div className="mb-6">
           <a
             href={`https://wa.me/918197803617?text=Hello%20One%20Point%20Team%2C%20I%20have%20submitted%20my%20enquiry%20with%20ID%20${submissionId}.%20Please%20guide%20me.`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-emerald-600/20 hover:scale-105 active:scale-95"
           >
-            <MessageCircle className="w-4 h-4" />
-            <span>Fast-Track on WhatsApp: 8197803617</span>
+            <WhatsAppIcon className="w-4 h-4 fill-white" />
+            <span>Connect on Official WhatsApp</span>
           </a>
         </div>
 

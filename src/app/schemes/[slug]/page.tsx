@@ -7,6 +7,7 @@ import {
 } from "@/data/schemes";
 import { siteConfig } from "@/config/site";
 import EnquiryForm from "@/components/EnquiryForm";
+import WhatsAppIcon from "@/components/WhatsAppIcon";
 import {
   ArrowLeft,
   Calendar,
@@ -312,10 +313,10 @@ export default async function SchemeDetailPage({ params }: Props) {
                   href={`https://wa.me/918197803617?text=Hello%20One%20Point%20Team%2C%20I%20need%20assistance%20regarding%20${encodeURIComponent(scheme.title)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider transition-colors shadow-sm"
+                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-emerald-600/20 hover:scale-[1.01]"
                 >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>WhatsApp: 8197803617</span>
+                  <WhatsAppIcon className="w-4 h-4 fill-white" />
+                  <span>Official WhatsApp Assistance</span>
                 </a>
                 <div className="pt-1">
                   <Link

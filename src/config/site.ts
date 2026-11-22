@@ -45,10 +45,10 @@ export const siteConfig: SiteConfig = {
     "Independent service organisation operating under NextGen Organisation. Not a government agency.",
   contact: {
     whatsapp: "918197803617",
-    whatsappDisplay: "+91 81978 03617",
+    whatsappDisplay: "Official WhatsApp Assistance",
     whatsappUrl: "https://wa.me/918197803617?text=Hello%20One%20Point%20Team%2C%20I%20would%20like%20assistance%20with%20an%20educational%20scheme.",
     phone: "+918197803617",
-    phoneDisplay: "+91 81978 03617",
+    phoneDisplay: "Official Student Helpline",
     address: {
       line1: "Tech Zone Public Assistance Network",
       line2: "Operating across Karnataka District Network",

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { siteConfig } from "@/config/site";
 import BrandLogo from "./BrandLogo";
+import WhatsAppIcon from "./WhatsAppIcon";
 import {
   MapPin,
   Clock,
@@ -10,7 +11,6 @@ import {
   Shield,
   FileQuestion,
   Layers,
-  MessageCircle,
 } from "lucide-react";
 
 export default function Footer() {
@@ -141,14 +141,15 @@ export default function Footer() {
                 <span>{siteConfig.contact.address.line1}, {siteConfig.contact.address.city}, {siteConfig.contact.address.state}</span>
               </li>
               <li className="flex items-center gap-2.5">
-                <MessageCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                <WhatsAppIcon className="w-4 h-4 fill-emerald-400 shrink-0" />
                 <a
-                  href="https://wa.me/918197803617?text=Hello%20One%20Point%20Team%2C%20I%20would%20like%20assistance%20with%20an%20educational%20scheme."
+                  href={siteConfig.contact.whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-emerald-300 font-medium transition-colors"
+                  className="hover:text-emerald-300 font-medium transition-colors flex items-center gap-1.5"
                 >
-                  WhatsApp: <strong className="text-white">+91 81978 03617</strong>
+                  <span>WhatsApp:</span>
+                  <strong className="text-emerald-400 font-bold hover:underline">Official Assistance Desk &rarr;</strong>
                 </a>
               </li>
               <li className="flex items-center gap-2.5">

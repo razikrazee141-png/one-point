@@ -245,7 +245,7 @@ export async function POST(request: Request) {
       {
         success: false,
         error:
-          "An unexpected error occurred while submitting your enquiry. Please try again or chat directly with us on WhatsApp at 8197803617.",
+          "An unexpected error occurred while submitting your enquiry. Please try again or connect directly with our official WhatsApp support channel.",
       },
       { status: 500 }
     );

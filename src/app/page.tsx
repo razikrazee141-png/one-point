@@ -7,6 +7,8 @@ import { getFeaturedSchemes } from "@/data/schemes";
 import SchemeCard from "@/components/SchemeCard";
 import EnquiryModal from "@/components/EnquiryModal";
 import IndependentDisclaimerBanner from "@/components/IndependentDisclaimerBanner";
+import WhatsAppIcon from "@/components/WhatsAppIcon";
+import Image from "next/image";
 import {
   GraduationCap,
   Building2,
@@ -146,28 +148,45 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col">
-      {/* HERO SECTION */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-blue-950 text-white pt-12 pb-20 md:pt-16 md:pb-28">
-        {/* Subtle background glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-blue-600/10 blur-[120px] pointer-events-none rounded-full" />
-        <div className="absolute -top-10 -right-10 w-80 h-80 bg-red-600/10 blur-[100px] pointer-events-none rounded-full" />
+      {/* SUPER OFFICIAL HERO SECTION */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-navy-950 text-white pt-10 pb-20 md:pt-14 md:pb-24 border-b border-slate-800">
+        {/* Subtle architectural grid pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
+        
+        {/* Subtle atmospheric ambient glows */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl h-96 bg-royal-600/10 blur-[130px] pointer-events-none rounded-full" />
+        <div className="absolute top-20 right-10 w-72 h-72 bg-red-600/10 blur-[100px] pointer-events-none rounded-full" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center space-y-6">
-            {/* Tagline Badge */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-800/80 border border-slate-700/80 text-xs text-slate-300 shadow-sm animate-fade-in">
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-              <span className="font-semibold text-white tracking-wide">
-                ONE POINT – ASSURED TECH ZONE
+          <div className="max-w-4xl mx-auto text-center space-y-6">
+            
+            {/* Official Portal Header Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900/90 border border-slate-700/80 text-xs text-slate-300 shadow-lg backdrop-blur-md">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="font-extrabold text-white tracking-wider uppercase font-mono text-[11px]">
+                Official Digital Public Support Hub
               </span>
-              <span className="text-slate-500 hidden sm:inline">|</span>
-              <span className="text-amber-400 font-medium hidden sm:inline">
+              <span className="text-slate-600">•</span>
+              <span className="text-amber-400 font-semibold text-[11px]">
                 NextGen Organisation
               </span>
             </div>
 
-            {/* Main Heading */}
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight">
+            {/* Official Brand Typo Display */}
+            <div className="pt-2 flex justify-center">
+              <div className="relative w-64 sm:w-80 h-16 sm:h-20 bg-white/95 rounded-2xl p-2 shadow-2xl border border-slate-200/90 flex items-center justify-center">
+                <Image
+                  src="/images/one-point-logo.jpg"
+                  alt="ONE POINT ASSURED TECH ZONE"
+                  fill
+                  className="object-contain p-2"
+                  priority
+                />
+              </div>
+            </div>
+
+            {/* Main Official Heading */}
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.15]">
               Your Opportunities. <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-300 to-red-400">
                 Our Assistance.
@@ -176,52 +195,66 @@ export default function HomePage() {
             </h1>
 
             {/* Subheading */}
-            <p className="text-base sm:text-xl text-slate-300 font-normal leading-relaxed max-w-2xl mx-auto">
-              Discover educational opportunities, government welfare schemes and essential digital services, all through one trusted destination.
+            <p className="text-sm sm:text-lg text-slate-300 font-normal leading-relaxed max-w-2xl mx-auto">
+              Karnataka&apos;s trusted student facilitation network for government scholarship notifications, education loans, merit admissions, and essential citizen digital services.
             </p>
 
             {/* Supporting Statement */}
-            <p className="text-xs sm:text-sm text-amber-300/90 font-medium tracking-wide">
-              &quot;{siteConfig.supportingStatement}&quot;
+            <p className="text-xs sm:text-sm text-amber-300 font-semibold tracking-wide">
+              &quot;One destination. Multiple solutions. Better opportunities.&quot;
             </p>
 
-            {/* CTA Buttons */}
-            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4">
+            {/* Official Action CTAs */}
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3.5">
+              {/* Primary Explore Schemes */}
               <Link
                 href="/schemes"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm tracking-wide transition-all shadow-lg hover:shadow-blue-500/25 active:scale-95"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-gradient-to-r from-royal-600 to-navy-800 hover:from-royal-500 hover:to-navy-700 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-royal-600/30 hover:scale-[1.02] active:scale-95"
               >
-                <span>Explore Schemes</span>
+                <span>Explore Verified Schemes</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
 
+              {/* Official WhatsApp Support Channel (NO raw phone number) */}
+              <a
+                href={siteConfig.contact.whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-emerald-600/30 hover:scale-[1.02] active:scale-95"
+                title="Connect with OnePoint Support on Official WhatsApp"
+              >
+                <WhatsAppIcon className="w-4 h-4 fill-white" />
+                <span>Connect on Official WhatsApp</span>
+              </a>
+
+              {/* Get Assistance Modal Trigger */}
               <button
                 type="button"
                 onClick={() => setIsModalOpen(true)}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm tracking-wide transition-all border border-white/20 backdrop-blur-sm active:scale-95 cursor-pointer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-xs uppercase tracking-wider transition-all border border-slate-700 backdrop-blur-sm active:scale-95 cursor-pointer"
               >
                 <Sparkles className="w-4 h-4 text-amber-300" />
-                <span>Get Assistance</span>
+                <span>Submit Query</span>
               </button>
             </div>
 
-            {/* Highlights Bar */}
+            {/* Institutional Trust Badges */}
             <div className="pt-8 grid grid-cols-2 md:grid-cols-4 gap-3 text-left border-t border-slate-800/80">
-              <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
-                <span className="block text-lg font-bold text-white">100%</span>
-                <span className="text-xs text-slate-400">Independent Guidance</span>
+              <div className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">
+                <span className="block text-base sm:text-lg font-black text-white">31 Districts</span>
+                <span className="text-[11px] text-slate-400 font-medium">Karnataka State Reach</span>
               </div>
-              <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
-                <span className="block text-lg font-bold text-white">4 Major</span>
-                <span className="text-xs text-slate-400">Service Domains</span>
+              <div className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">
+                <span className="block text-base sm:text-lg font-black text-amber-400">100% Free</span>
+                <span className="text-[11px] text-slate-400 font-medium">Application Guidance</span>
               </div>
-              <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
-                <span className="block text-lg font-bold text-white">31 Districts</span>
-                <span className="text-xs text-slate-400">Karnataka Reach</span>
+              <div className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">
+                <span className="block text-base sm:text-lg font-black text-emerald-400">₹25,000+</span>
+                <span className="text-[11px] text-slate-400 font-medium">Active Grants &amp; Incentives</span>
               </div>
-              <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
-                <span className="block text-lg font-bold text-white">Direct</span>
-                <span className="text-xs text-slate-400">Sheets Integration</span>
+              <div className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">
+                <span className="block text-base sm:text-lg font-black text-royal-400">NextGen</span>
+                <span className="text-[11px] text-slate-400 font-medium">Supervised Operations</span>
               </div>
             </div>
           </div>
