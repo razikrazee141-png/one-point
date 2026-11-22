@@ -32,6 +32,7 @@ import {
   Check,
   CheckCheck,
   Copy,
+  Share2,
   Building,
 } from "lucide-react";
 
@@ -112,6 +113,8 @@ export default function AdminPage() {
   const [activeTemplate, setActiveTemplate] = useState<string>("welcome");
   const [saveSuccessNotice, setSaveSuccessNotice] = useState(false);
   const [imageCopied, setImageCopied] = useState(false);
+  const [clipboardNotice, setClipboardNotice] = useState(false);
+  const [includeImageLink, setIncludeImageLink] = useState(false);
 
   // Copy Welcome Poster to Clipboard for WhatsApp attachment
   const handleCopyWelcomeImage = async () => {
@@ -388,11 +391,25 @@ ONE POINT Team`);
   };
 
   // 8. Trigger WhatsApp Response & Auto-mark as Responded
-  const handleSendWhatsApp = () => {
+  const handleSendWhatsApp = async () => {
     if (!activeEnquiry || !activeEnquiry.phone) return;
     const cleanPhone = activeEnquiry.phone.replace(/[^0-9]/g, "");
     const formattedPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
-    const encodedText = encodeURIComponent(customReplyMessage);
+
+    // 1. Auto-copy the welcome poster to clipboard so admin can immediately Ctrl+V in WhatsApp
+    try {
+      await handleCopyWelcomeImage();
+    } catch {
+      // Continue even if clipboard write fails
+    }
+
+    // 2. Build final message text
+    let finalMsg = customReplyMessage;
+    if (includeImageLink && typeof window !== "undefined") {
+      finalMsg += `\n\n🖼️ Official Welcome Poster: ${window.location.origin}/images/onepoint-welcome-card.jpg`;
+    }
+
+    const encodedText = encodeURIComponent(finalMsg);
     const waUrl = `https://wa.me/${formattedPhone}?text=${encodedText}`;
 
     // Auto mark as responded
@@ -400,7 +417,40 @@ ONE POINT Team`);
       handleQuickStatusUpdate(activeEnquiry, "responded");
     }
 
+    setClipboardNotice(true);
+    setTimeout(() => setClipboardNotice(false), 9000);
+
     window.open(waUrl, "_blank");
+  };
+
+  // Direct Web Share with actual file attachment (when supported by browser / mobile)
+  const handleShareWithPhoto = async () => {
+    if (!activeEnquiry) return;
+    try {
+      const response = await fetch("/images/onepoint-welcome-card.jpg");
+      const blob = await response.blob();
+      const file = new File([blob], "onepoint-welcome-poster.jpg", { type: "image/jpeg" });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        let finalMsg = customReplyMessage;
+        if (includeImageLink && typeof window !== "undefined") {
+          finalMsg += `\n\n🖼️ Official Welcome Poster: ${window.location.origin}/images/onepoint-welcome-card.jpg`;
+        }
+        await navigator.share({
+          files: [file],
+          title: "ONEPOINT Welcome",
+          text: finalMsg,
+        });
+        if (activeEnquiry.status !== "resolved") {
+          handleQuickStatusUpdate(activeEnquiry, "responded");
+        }
+        return;
+      }
+    } catch (e) {
+      console.log("Web Share:", e);
+    }
+    // Fallback to standard WhatsApp
+    handleSendWhatsApp();
   };
 
   // 9. Trigger Phone Call & Auto-mark as Responded
@@ -1375,6 +1425,51 @@ ONE POINT Team`);
                   </div>
                 </div>
 
+                {/* WhatsApp Attachment Instructions & Options */}
+                <div className="space-y-2">
+                  <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-200 text-xs flex items-start gap-2.5">
+                    <span className="p-1 rounded-md bg-emerald-500/20 text-emerald-300 shrink-0">
+                      <Check className="w-3.5 h-3.5" />
+                    </span>
+                    <div className="space-y-0.5">
+                      <span className="font-bold text-white block">
+                        Auto-Photo Clipboard Enabled:
+                      </span>
+                      <p className="text-[11px] text-emerald-200/90 leading-relaxed">
+                        Browser WhatsApp links prefill the message text. Clicking <strong>Send on WhatsApp</strong> copies this welcome poster to your clipboard automatically—just press <kbd className="px-1.5 py-0.5 bg-emerald-900/80 rounded text-[10px] text-white border border-emerald-500/50 font-mono">Ctrl + V</kbd> inside WhatsApp to attach the photo!
+                      </p>
+                    </div>
+                  </div>
+
+                  <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-slate-300 pt-0.5">
+                    <input
+                      type="checkbox"
+                      checked={includeImageLink}
+                      onChange={(e) => setIncludeImageLink(e.target.checked)}
+                      className="w-4 h-4 rounded bg-slate-900 border-slate-700 text-royal-600 focus:ring-royal-500"
+                    />
+                    <span>Include public link to welcome poster inside WhatsApp text</span>
+                  </label>
+                </div>
+
+                {/* Clipboard Toast Banner */}
+                {clipboardNotice && (
+                  <div className="p-3 rounded-xl bg-purple-900/40 border border-purple-500/40 text-purple-200 text-xs flex items-center justify-between animate-fade-in shadow-lg">
+                    <span className="flex items-center gap-2">
+                      <Copy className="w-4 h-4 text-purple-400 shrink-0" />
+                      <span>
+                        <strong>Poster copied to clipboard!</strong> In WhatsApp chat, press <kbd className="px-1 py-0.5 bg-purple-950 rounded text-white border border-purple-400">Ctrl + V</kbd> to paste the photo.
+                      </span>
+                    </span>
+                    <button
+                      onClick={() => setClipboardNotice(false)}
+                      className="text-purple-300 hover:text-white ml-2 text-sm font-bold"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+
                 {/* Message Textarea */}
                 <div>
                   <label className="block text-xs text-slate-400 mb-1.5">Custom Reply Message (Editable)</label>
@@ -1387,33 +1482,44 @@ ONE POINT Team`);
                 </div>
 
                 {/* Action Channels */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-                  {/* WhatsApp Action */}
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5 pt-2">
+                  {/* WhatsApp Action with Auto-Copy */}
                   <button
                     onClick={handleSendWhatsApp}
-                    className="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs tracking-wide shadow-lg shadow-emerald-600/25 transition-all flex items-center justify-center gap-2"
+                    className="py-3 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs tracking-wide shadow-lg shadow-emerald-600/25 transition-all flex items-center justify-center gap-1.5"
+                    title="Opens WhatsApp & auto-copies photo to clipboard"
                   >
                     <MessageSquare className="w-4 h-4" />
-                    Send on WhatsApp
+                    <span>WhatsApp</span>
+                  </button>
+
+                  {/* Direct Native Share Sheet (File Attachment) */}
+                  <button
+                    onClick={handleShareWithPhoto}
+                    className="py-3 px-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs tracking-wide shadow-lg shadow-purple-600/25 transition-all flex items-center justify-center gap-1.5"
+                    title="Direct file share via device apps (Mobile / Supported browsers)"
+                  >
+                    <Share2 className="w-4 h-4" />
+                    <span>Share with Photo</span>
                   </button>
 
                   {/* Phone Call Action */}
                   <button
                     onClick={handleCall}
-                    className="py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs tracking-wide shadow-lg shadow-blue-600/25 transition-all flex items-center justify-center gap-2"
+                    className="py-3 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs tracking-wide shadow-lg shadow-blue-600/25 transition-all flex items-center justify-center gap-1.5"
                   >
                     <PhoneCall className="w-4 h-4" />
-                    Call Applicant
+                    <span>Call</span>
                   </button>
 
                   {/* Email Action */}
                   <button
                     onClick={handleEmail}
                     disabled={!activeEnquiry.email || activeEnquiry.email.endsWith("@onepoint.nextgen.org")}
-                    className="py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-semibold text-xs tracking-wide border border-slate-700 transition-all flex items-center justify-center gap-2 disabled:opacity-40"
+                    className="py-3 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-semibold text-xs tracking-wide border border-slate-700 transition-all flex items-center justify-center gap-1.5 disabled:opacity-40"
                   >
                     <Mail className="w-4 h-4" />
-                    Send via Email
+                    <span>Email</span>
                   </button>
                 </div>
               </div>
