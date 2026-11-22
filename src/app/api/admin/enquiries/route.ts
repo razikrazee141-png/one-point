@@ -42,8 +42,28 @@ function parseDetailsFromMessage(message: string = "") {
   return { scheme, education, district, contactPref, cleanMessage };
 }
 
+function checkIsOnePoint(item: any): boolean {
+  const id = (item.id || "").toLowerCase();
+  const subject = (item.subject || "").toLowerCase();
+  const message = (item.message || "").toLowerCase();
+  const email = (item.email || "").toLowerCase();
+
+  return (
+    id.startsWith("nxg-op-") ||
+    id.startsWith("op-") ||
+    subject.includes("onepoint") ||
+    subject.includes("one point") ||
+    email.includes("onepoint.nextgen.org") ||
+    message.includes("onepoint") ||
+    message.includes("one point") ||
+    message.includes("[scheme:")
+  );
+}
+
 // 1. GET: Fetch all enquiries for authenticated admin
-export async function GET() {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const scope = searchParams.get("scope") || "onepoint"; // "onepoint" by default
   const cookieStore = await cookies();
   const token = cookieStore.get("onepoint_admin_token")?.value;
 
@@ -157,9 +177,7 @@ export async function GET() {
     // Format records from inquiries
     const formattedFromInquiries = rawInquiriesList.map((item) => {
       const parsed = parseDetailsFromMessage(item.message || "");
-      const isOnePoint =
-        (item.id && (item.id.startsWith("NXG-OP-") || item.id.startsWith("OP-"))) ||
-        (item.subject && item.subject.toLowerCase().includes("onepoint"));
+      const isOnePoint = checkIsOnePoint(item);
 
       return {
         id: item.id,
@@ -180,9 +198,15 @@ export async function GET() {
       };
     });
 
+    // If scope is "onepoint" (default), only include inquiries that belong to OnePoint
+    const inquiriesToMerge =
+      scope === "all"
+        ? formattedFromInquiries
+        : formattedFromInquiries.filter((inq) => inq.isOnePoint);
+
     // Merge and deduplicate by phone number + approximate timestamp or ID
     const combined = [...formattedFromOnepoint];
-    for (const inq of formattedFromInquiries) {
+    for (const inq of inquiriesToMerge) {
       const cleanPhone = (inq.phone || "").replace(/[^0-9]/g, "").slice(-10);
       const isDuplicate = combined.some((op) => {
         if (op.id === inq.id) return true;

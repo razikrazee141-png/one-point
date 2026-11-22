@@ -108,7 +108,7 @@ export default function AdminPage() {
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [sourceFilter, setSourceFilter] = useState<"all" | "onepoint">("all");
+  const [sourceFilter, setSourceFilter] = useState<"onepoint" | "all">("onepoint");
 
   // Selected Enquiry for Respond Modal
   const [activeEnquiry, setActiveEnquiry] = useState<EnquiryItem | null>(null);
@@ -191,7 +191,7 @@ export default function AdminPage() {
     setIsTableError(false);
     setMissingVars([]);
     try {
-      const res = await fetch("/api/admin/enquiries");
+      const res = await fetch("/api/admin/enquiries?scope=all");
       const data = await res.json();
       if (res.ok && data.success) {
         setEnquiries(data.enquiries || []);
@@ -548,24 +548,33 @@ ONE POINT Team`);
     });
   }, [enquiries, sourceFilter, statusFilter, searchQuery]);
 
+  // Source-scoped enquiries for stats & display
+  const sourceScopedEnquiries = useMemo(() => {
+    return enquiries.filter((item) => {
+      if (sourceFilter === "onepoint" && !item.isOnePoint) return false;
+      return true;
+    });
+  }, [enquiries, sourceFilter]);
+
   // Statistics calculation with Viewed and Responded counts
   const stats = useMemo(() => {
-    const total = enquiries.length;
-    const pending = enquiries.filter(
+    const list = sourceScopedEnquiries;
+    const total = list.length;
+    const pending = list.filter(
       (e) => e.status === "new" || e.status === "pending"
     ).length;
-    const viewed = enquiries.filter((e) => e.status === "viewed").length;
-    const responded = enquiries.filter(
+    const viewed = list.filter((e) => e.status === "viewed").length;
+    const responded = list.filter(
       (e) => e.status === "responded" || e.status === "contacted"
     ).length;
-    const inProgress = enquiries.filter((e) => e.status === "in_progress").length;
-    const resolved = enquiries.filter((e) => e.status === "resolved").length;
+    const inProgress = list.filter((e) => e.status === "in_progress").length;
+    const resolved = list.filter((e) => e.status === "resolved").length;
     return { total, pending, viewed, responded, inProgress, resolved };
-  }, [enquiries]);
+  }, [sourceScopedEnquiries]);
 
-  // Export CSV
+  // Export CSV (based on active filter)
   const handleExportCSV = () => {
-    if (enquiries.length === 0) return;
+    if (filteredEnquiries.length === 0) return;
     const headers = [
       "Submission ID",
       "Date",
@@ -579,7 +588,7 @@ ONE POINT Team`);
       "Message",
     ];
 
-    const rows = enquiries.map((e) => [
+    const rows = filteredEnquiries.map((e) => [
       `"${e.id}"`,
       `"${new Date(e.created_at).toLocaleString("en-IN")}"`,
       `"${(e.name || "").replace(/"/g, '""')}"`,
@@ -948,9 +957,62 @@ ONE POINT Team`);
         </div>
 
         {/* Filter and Search Bar */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg flex flex-col gap-4">
+          <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+            {/* Source Scope Selector (OnePoint Only vs All NextGen Records) */}
+            <div className="flex items-center gap-1.5 p-1 bg-slate-950 rounded-xl border border-slate-800 self-start">
+              <button
+                type="button"
+                onClick={() => setSourceFilter("onepoint")}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  sourceFilter === "onepoint"
+                    ? "bg-royal-600 text-white shadow-md shadow-royal-600/30"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-gold-400" />
+                OnePoint Enquiries Only
+              </button>
+              <button
+                type="button"
+                onClick={() => setSourceFilter("all")}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  sourceFilter === "all"
+                    ? "bg-slate-800 text-white font-semibold shadow-sm"
+                    : "text-slate-500 hover:text-slate-300"
+                }`}
+              >
+                All NextGen Records ({enquiries.length})
+              </button>
+            </div>
+
+            {/* Status Filter Buttons */}
+            <div className="flex flex-wrap items-center gap-1.5">
+              {[
+                { key: "all", label: "All" },
+                { key: "new", label: "New" },
+                { key: "viewed", label: "Viewed" },
+                { key: "responded", label: "Responded" },
+                { key: "in_progress", label: "In Progress" },
+                { key: "resolved", label: "Resolved" },
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setStatusFilter(tab.key)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    statusFilter === tab.key
+                      ? "bg-royal-600 text-white shadow-md shadow-royal-600/30"
+                      : "bg-slate-950 text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-slate-800"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Search Box */}
-          <div className="relative flex-1">
+          <div className="relative">
             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
             <input
               type="text"
@@ -959,30 +1021,6 @@ ONE POINT Team`);
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-royal-500 transition-all"
             />
-          </div>
-
-          {/* Status Filter Buttons */}
-          <div className="flex flex-wrap items-center gap-1.5">
-            {[
-              { key: "all", label: "All" },
-              { key: "new", label: "New" },
-              { key: "viewed", label: "Viewed" },
-              { key: "responded", label: "Responded" },
-              { key: "in_progress", label: "In Progress" },
-              { key: "resolved", label: "Resolved" },
-            ].map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setStatusFilter(tab.key)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  statusFilter === tab.key
-                    ? "bg-royal-600 text-white shadow-md shadow-royal-600/30"
-                    : "bg-slate-950 text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-slate-800"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
           </div>
         </div>
 
